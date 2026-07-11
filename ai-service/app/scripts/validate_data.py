@@ -122,12 +122,18 @@ def validate_and_split():
     # Sort chronologically by timestamp
     df_windows = sorted(df_windows, key=lambda x: x["timestamp"])
     total_rows = len(df_windows)
-    train_idx = int(total_rows * 0.70)
-    val_idx = int(total_rows * 0.85)
+    # Split by unique timestamps so identical timestamps never cross split boundaries.
+    unique_timestamps = sorted(set(row["timestamp"] for row in df_windows))
+    train_ts_idx = int(len(unique_timestamps) * 0.70)
+    val_ts_idx = int(len(unique_timestamps) * 0.85)
 
-    df_train = df_windows[:train_idx]
-    df_val = df_windows[train_idx:val_idx]
-    df_test = df_windows[val_idx:]
+    train_timestamps_set = set(unique_timestamps[:train_ts_idx])
+    val_timestamps_set = set(unique_timestamps[train_ts_idx:val_ts_idx])
+    test_timestamps_set = set(unique_timestamps[val_ts_idx:])
+
+    df_train = [row for row in df_windows if row["timestamp"] in train_timestamps_set]
+    df_val = [row for row in df_windows if row["timestamp"] in val_timestamps_set]
+    df_test = [row for row in df_windows if row["timestamp"] in test_timestamps_set]
 
     # Write splits
     fieldnames = list(df_windows[0].keys())

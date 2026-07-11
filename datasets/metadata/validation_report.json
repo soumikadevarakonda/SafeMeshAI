@@ -1,5 +1,5 @@
 {
-  "validation_timestamp": "2026-07-11T12:17:35.079964",
+  "validation_timestamp": "2026-07-11T12:31:51.765465",
   "row_counts": {
     "zones.csv": 10,
     "equipment.csv": 59,
@@ -166,5 +166,5 @@
   },
   "foreign_key_errors": [],
   "schema_validation": "SUCCESS",
-  "data_leakage_audit": "LEAKAGE_DETECTED"
+  "data_leakage_audit": "CLEAN"
 }
