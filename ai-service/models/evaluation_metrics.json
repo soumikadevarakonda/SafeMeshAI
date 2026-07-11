@@ -1,0 +1,50 @@
+{
+  "metadata": {
+    "evaluated_at": "2026-07-11T12:18:07.250638",
+    "test_set_size": 1612,
+    "model_version": "v1.0.0"
+  },
+  "baseline": {
+    "accuracy": 0.8877171215880894,
+    "precision": 0.11688311688311688,
+    "recall": 0.07377049180327869,
+    "f1": 0.09045226130653267,
+    "specificity": 0.9543624161073826,
+    "confusion_matrix": [
+      [
+        1422,
+        68
+      ],
+      [
+        113,
+        9
+      ]
+    ],
+    "avg_lead_time_min": 0.0,
+    "median_lead_time_min": 0.0,
+    "incidents_detected": 0,
+    "incidents_missed": 2
+  },
+  "compound": {
+    "accuracy": 0.9851116625310173,
+    "precision": 1.0,
+    "recall": 0.8032786885245902,
+    "f1": 0.8909090909090909,
+    "specificity": 1.0,
+    "confusion_matrix": [
+      [
+        1490,
+        0
+      ],
+      [
+        24,
+        98
+      ]
+    ],
+    "avg_lead_time_min": 0.0,
+    "median_lead_time_min": 0.0,
+    "incidents_detected": 0,
+    "incidents_missed": 2
+  },
+  "lead_time_improvement_min": 0.0
+}

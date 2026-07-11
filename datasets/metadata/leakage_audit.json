@@ -1,0 +1,19 @@
+{
+  "status": "LEAKAGE_DETECTED",
+  "train_range": [
+    "2026-07-01T12:17:23.855595",
+    "2026-07-08T11:27:23.855595"
+  ],
+  "val_range": [
+    "2026-07-08T11:27:23.855595",
+    "2026-07-10T00:42:23.855595"
+  ],
+  "test_range": [
+    "2026-07-10T00:42:23.855595",
+    "2026-07-11T12:12:23.855595"
+  ],
+  "details": [
+    "Train max timestamp (2026-07-08T11:27:23.855595) overlaps or is after Validation min timestamp (2026-07-08T11:27:23.855595)",
+    "Validation max timestamp (2026-07-10T00:42:23.855595) overlaps or is after Test min timestamp (2026-07-10T00:42:23.855595)"
+  ]
+}

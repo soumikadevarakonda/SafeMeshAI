@@ -1,0 +1,17 @@
+{
+  "train_size": 7520,
+  "validation_size": 1612,
+  "test_size": 1612,
+  "train_class_dist": {
+    "0": 7053,
+    "1": 467
+  },
+  "val_class_dist": {
+    "0": 1546,
+    "1": 66
+  },
+  "test_class_dist": {
+    "0": 1490,
+    "1": 122
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "random_seed": 42,
+  "total_days": 10,
+  "step_interval_minutes": 5,
+  "num_zones": 10,
+  "num_equipment": 59,
+  "num_sensors": 172
+}

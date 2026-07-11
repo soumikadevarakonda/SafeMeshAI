@@ -1,0 +1,4 @@
+rule_id,name,description
+RULE-1,Combustible Gas + Hot Work + Low Ventilation,Detects high ignition risk when combustible gas levels rise above 15% LEL while a active HOT WORK permit is running in the same zone with ventilation efficiency below 75%.
+RULE-2,Confined Space Entry + Oxygen Deficiency,Triggers alert if workers enter a zone with an active CONFINED SPACE permit while local oxygen content falls below 19.5%.
+RULE-3,High Vibration + High Pressure + Overdue Maintenance,"Flags potential mechanical burst if compressor vibration exceeds 4.0 mm/s, pressure exceeds 150 psi, and maintenance schedule is overdue."

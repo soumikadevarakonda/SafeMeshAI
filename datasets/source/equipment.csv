@@ -1,0 +1,60 @@
+equipment_id,name,code,type,zone_id,health_score,status
+EQ-COB-1,Coke Oven Battery Compressor 1,EQ-COB-1,Extractor Fan,Z-1,97.42,OPERATIONAL
+EQ-COB-2,Coke Oven Battery Steam Boiler 2,EQ-COB-2,Steam Boiler,Z-1,91.4,OPERATIONAL
+EQ-COB-3,Coke Oven Battery Compressor 3,EQ-COB-3,Compressor,Z-1,95.9,OPERATIONAL
+EQ-COB-4,Coke Oven Battery Extractor Fan 4,EQ-COB-4,Extractor Fan,Z-1,90.94,OPERATIONAL
+EQ-COB-5,Coke Oven Battery Steam Boiler 5,EQ-COB-5,Extractor Fan,Z-1,95.61,OPERATIONAL
+EQ-COB-6,Coke Oven Battery Valve Block 6,EQ-COB-6,Steam Boiler,Z-1,94.49,OPERATIONAL
+EQ-COB-7,Coke Oven Battery Storage Tank 7,EQ-COB-7,Extractor Fan,Z-1,97.59,OPERATIONAL
+EQ-BF-1,Blast Furnace Valve Block 1,EQ-BF-1,Conveyor Belt,Z-2,92.78,OPERATIONAL
+EQ-BF-2,Blast Furnace Steam Boiler 2,EQ-BF-2,Conveyor Belt,Z-2,91.02,OPERATIONAL
+EQ-BF-3,Blast Furnace Valve Block 3,EQ-BF-3,Compressor,Z-2,93.59,OPERATIONAL
+EQ-BF-4,Blast Furnace Conveyor Belt 4,EQ-BF-4,Storage Tank,Z-2,98.07,OPERATIONAL
+EQ-BF-5,Blast Furnace Turbine Generator 5,EQ-BF-5,Compressor,Z-2,99.73,OPERATIONAL
+EQ-GS-1,Gas Storage Facility Compressor 1,EQ-GS-1,Storage Tank,Z-3,98.29,OPERATIONAL
+EQ-GS-2,Gas Storage Facility Conveyor Belt 2,EQ-GS-2,Steam Boiler,Z-3,97.05,OPERATIONAL
+EQ-GS-3,Gas Storage Facility Extractor Fan 3,EQ-GS-3,Steam Boiler,Z-3,97.73,OPERATIONAL
+EQ-GS-4,Gas Storage Facility Compressor 4,EQ-GS-4,Steam Boiler,Z-3,98.66,OPERATIONAL
+EQ-GS-5,Gas Storage Facility Valve Block 5,EQ-GS-5,Storage Tank,Z-3,94.53,OPERATIONAL
+EQ-GS-6,Gas Storage Facility Conveyor Belt 6,EQ-GS-6,Preheater,Z-3,93.7,OPERATIONAL
+EQ-BH-1,Boiler House Storage Tank 1,EQ-BH-1,Compressor,Z-4,96.09,OPERATIONAL
+EQ-BH-2,Boiler House Preheater 2,EQ-BH-2,Steam Boiler,Z-4,91.63,OPERATIONAL
+EQ-BH-3,Boiler House Valve Block 3,EQ-BH-3,Storage Tank,Z-4,99.9,OPERATIONAL
+EQ-BH-4,Boiler House Steam Boiler 4,EQ-BH-4,Conveyor Belt,Z-4,98.43,OPERATIONAL
+EQ-BH-5,Boiler House Extractor Fan 5,EQ-BH-5,Steam Boiler,Z-4,98.22,OPERATIONAL
+EQ-MW-1,Maintenance Workshop Valve Block 1,EQ-MW-1,Storage Tank,Z-5,90.66,OPERATIONAL
+EQ-MW-2,Maintenance Workshop Conveyor Belt 2,EQ-MW-2,Steam Boiler,Z-5,96.55,OPERATIONAL
+EQ-MW-3,Maintenance Workshop Valve Block 3,EQ-MW-3,Turbine Generator,Z-5,91.43,OPERATIONAL
+EQ-MW-4,Maintenance Workshop Preheater 4,EQ-MW-4,Steam Boiler,Z-5,97.45,OPERATIONAL
+EQ-MW-5,Maintenance Workshop Storage Tank 5,EQ-MW-5,Valve Block,Z-5,98.98,OPERATIONAL
+EQ-MW-6,Maintenance Workshop Valve Block 6,EQ-MW-6,Conveyor Belt,Z-5,92.19,OPERATIONAL
+EQ-CS-1,Compressor Station Turbine Generator 1,EQ-CS-1,Compressor,Z-6,97.56,OPERATIONAL
+EQ-CS-2,Compressor Station Compressor 2,EQ-CS-2,Preheater,Z-6,96.27,OPERATIONAL
+EQ-CS-3,Compressor Station Valve Block 3,EQ-CS-3,Compressor,Z-6,93.85,OPERATIONAL
+EQ-CS-4,Compressor Station Turbine Generator 4,EQ-CS-4,Storage Tank,Z-6,99.71,OPERATIONAL
+EQ-CS-5,Compressor Station Extractor Fan 5,EQ-CS-5,Compressor,Z-6,96.82,OPERATIONAL
+EQ-RMH-1,Raw Material Handling Storage Tank 1,EQ-RMH-1,Conveyor Belt,Z-7,91.12,OPERATIONAL
+EQ-RMH-2,Raw Material Handling Valve Block 2,EQ-RMH-2,Preheater,Z-7,94.54,OPERATIONAL
+EQ-RMH-3,Raw Material Handling Storage Tank 3,EQ-RMH-3,Preheater,Z-7,95.08,OPERATIONAL
+EQ-RMH-4,Raw Material Handling Compressor 4,EQ-RMH-4,Storage Tank,Z-7,98.42,OPERATIONAL
+EQ-RMH-5,Raw Material Handling Steam Boiler 5,EQ-RMH-5,Preheater,Z-7,93.74,OPERATIONAL
+EQ-RMH-6,Raw Material Handling Preheater 6,EQ-RMH-6,Extractor Fan,Z-7,95.99,OPERATIONAL
+EQ-RMH-7,Raw Material Handling Turbine Generator 7,EQ-RMH-7,Extractor Fan,Z-7,91.12,OPERATIONAL
+EQ-WH-1,Warehouse Logistics Storage Tank 1,EQ-WH-1,Steam Boiler,Z-8,90.58,OPERATIONAL
+EQ-WH-2,Warehouse Logistics Compressor 2,EQ-WH-2,Compressor,Z-8,97.32,OPERATIONAL
+EQ-WH-3,Warehouse Logistics Compressor 3,EQ-WH-3,Preheater,Z-8,91.28,OPERATIONAL
+EQ-WH-4,Warehouse Logistics Turbine Generator 4,EQ-WH-4,Preheater,Z-8,92.65,OPERATIONAL
+EQ-WH-5,Warehouse Logistics Valve Block 5,EQ-WH-5,Steam Boiler,Z-8,99.29,OPERATIONAL
+EQ-WH-6,Warehouse Logistics Steam Boiler 6,EQ-WH-6,Storage Tank,Z-8,93.99,OPERATIONAL
+EQ-UA-1,Utilities Area Conveyor Belt 1,EQ-UA-1,Turbine Generator,Z-9,99.0,OPERATIONAL
+EQ-UA-2,Utilities Area Turbine Generator 2,EQ-UA-2,Compressor,Z-9,92.48,OPERATIONAL
+EQ-UA-3,Utilities Area Compressor 3,EQ-UA-3,Conveyor Belt,Z-9,90.21,OPERATIONAL
+EQ-UA-4,Utilities Area Steam Boiler 4,EQ-UA-4,Steam Boiler,Z-9,90.07,OPERATIONAL
+EQ-UA-5,Utilities Area Extractor Fan 5,EQ-UA-5,Steam Boiler,Z-9,90.67,OPERATIONAL
+EQ-UA-6,Utilities Area Extractor Fan 6,EQ-UA-6,Conveyor Belt,Z-9,90.71,OPERATIONAL
+EQ-UA-7,Utilities Area Steam Boiler 7,EQ-UA-7,Storage Tank,Z-9,96.69,OPERATIONAL
+EQ-CR-1,Control Room Hub Preheater 1,EQ-CR-1,Turbine Generator,Z-10,92.43,OPERATIONAL
+EQ-CR-2,Control Room Hub Turbine Generator 2,EQ-CR-2,Valve Block,Z-10,91.9,OPERATIONAL
+EQ-CR-3,Control Room Hub Compressor 3,EQ-CR-3,Valve Block,Z-10,93.54,OPERATIONAL
+EQ-CR-4,Control Room Hub Valve Block 4,EQ-CR-4,Turbine Generator,Z-10,98.64,OPERATIONAL
+EQ-CR-5,Control Room Hub Extractor Fan 5,EQ-CR-5,Compressor,Z-10,90.61,OPERATIONAL

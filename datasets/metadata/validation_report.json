@@ -1,0 +1,170 @@
+{
+  "validation_timestamp": "2026-07-11T12:17:35.079964",
+  "row_counts": {
+    "zones.csv": 10,
+    "equipment.csv": 59,
+    "sensors.csv": 172,
+    "sensor_readings.csv": 122125,
+    "workers.csv": 250,
+    "worker_locations.csv": 4488,
+    "permits.csv": 2200,
+    "maintenance_records.csv": 5100,
+    "shift_logs.csv": 2400,
+    "incidents.csv": 520,
+    "risk_rules.csv": 3,
+    "compound_risk_windows.csv": 10744
+  },
+  "duplicate_ids": {
+    "zones.csv": 0,
+    "equipment.csv": 0,
+    "sensors.csv": 0,
+    "workers.csv": 0,
+    "permits.csv": 0,
+    "maintenance_records.csv": 0,
+    "incidents.csv": 0,
+    "risk_rules.csv": 0
+  },
+  "null_counts": {
+    "zones.csv": {
+      "zone_id": 0,
+      "name": 0,
+      "code": 0,
+      "coordinates": 0
+    },
+    "equipment.csv": {
+      "equipment_id": 0,
+      "name": 0,
+      "code": 0,
+      "type": 0,
+      "zone_id": 0,
+      "health_score": 0,
+      "status": 0
+    },
+    "sensors.csv": {
+      "sensor_id": 0,
+      "name": 0,
+      "code": 0,
+      "type": 0,
+      "unit": 0,
+      "equipment_id": 0,
+      "zone_id": 0,
+      "min_value": 0,
+      "max_value": 0,
+      "threshold_warning": 0,
+      "threshold_critical": 0
+    },
+    "sensor_readings.csv": {
+      "timestamp": 0,
+      "sensor_id": 0,
+      "value": 0
+    },
+    "workers.csv": {
+      "worker_id": 0,
+      "name": 0,
+      "badge_number": 0,
+      "role": 0,
+      "status": 0
+    },
+    "worker_locations.csv": {
+      "timestamp": 0,
+      "worker_id": 0,
+      "zone_id": 0,
+      "event_type": 0
+    },
+    "permits.csv": {
+      "permit_id": 0,
+      "permit_number": 0,
+      "type": 0,
+      "zone_id": 0,
+      "equipment_id": 0,
+      "worker_id": 0,
+      "status": 0,
+      "start_time": 0,
+      "end_time": 0,
+      "hazards": 0,
+      "controls": 0
+    },
+    "maintenance_records.csv": {
+      "maintenance_id": 0,
+      "equipment_id": 0,
+      "worker_id": 0,
+      "type": 0,
+      "description": 0,
+      "status": 0,
+      "scheduled_date": 0,
+      "completed_date": 3358
+    },
+    "shift_logs.csv": {
+      "shift_id": 0,
+      "zone_id": 0,
+      "log_text": 0,
+      "handover_quality": 0,
+      "timestamp": 0
+    },
+    "incidents.csv": {
+      "incident_id": 0,
+      "title": 0,
+      "description": 0,
+      "date": 0,
+      "zone_id": 0,
+      "severity": 0,
+      "root_cause": 0,
+      "corrective_actions": 0
+    },
+    "risk_rules.csv": {
+      "rule_id": 0,
+      "name": 0,
+      "description": 0
+    },
+    "compound_risk_windows.csv": {
+      "timestamp": 0,
+      "zone_id": 0,
+      "sensor_anomaly_score": 0,
+      "active_permits": 0,
+      "permit_overlap_count": 0,
+      "has_hot_work": 0,
+      "has_confined_space": 0,
+      "has_electrical_isolation": 0,
+      "simops_conflict": 0,
+      "worker_count": 0,
+      "worker_exposure_duration": 0,
+      "maintenance_overdue": 0,
+      "equipment_health_avg": 0,
+      "recent_near_miss_count": 0,
+      "shift_change": 0,
+      "risk_score": 0,
+      "is_incident_imminent": 0,
+      "combustible_gas_val": 0,
+      "combustible_gas_avg_30m": 0,
+      "combustible_gas_std_30m": 0,
+      "combustible_gas_slope_30m": 0,
+      "toxic_gas_val": 0,
+      "toxic_gas_avg_30m": 0,
+      "toxic_gas_std_30m": 0,
+      "toxic_gas_slope_30m": 0,
+      "oxygen_val": 0,
+      "oxygen_avg_30m": 0,
+      "oxygen_std_30m": 0,
+      "oxygen_slope_30m": 0,
+      "ventilation_val": 0,
+      "ventilation_avg_30m": 0,
+      "ventilation_std_30m": 0,
+      "ventilation_slope_30m": 0,
+      "pressure_val": 0,
+      "pressure_avg_30m": 0,
+      "pressure_std_30m": 0,
+      "pressure_slope_30m": 0,
+      "vibration_val": 0,
+      "vibration_avg_30m": 0,
+      "vibration_std_30m": 0,
+      "vibration_slope_30m": 0,
+      "temperature_val": 0,
+      "temperature_avg_30m": 0,
+      "temperature_std_30m": 0,
+      "temperature_slope_30m": 0
+    }
+  },
+  "foreign_key_errors": [],
+  "schema_validation": "SUCCESS",
+  "data_leakage_audit": "LEAKAGE_DETECTED"
+}

@@ -1,0 +1,173 @@
+sensor_id,name,code,type,unit,equipment_id,zone_id,min_value,max_value,threshold_warning,threshold_critical
+SEN-EQ-COB-1-1,Coke Oven Battery Compressor 1 Oxygen Sensor,SEN-EQ-COB-1-1,oxygen,%,EQ-COB-1,Z-1,0.0,25.0,19.5,18.0
+SEN-EQ-COB-1-2,Coke Oven Battery Compressor 1 Combustible gas Sensor,SEN-EQ-COB-1-2,combustible_gas,LEL%,EQ-COB-1,Z-1,0.0,100.0,20.0,40.0
+SEN-EQ-COB-1-3,Coke Oven Battery Compressor 1 Toxic gas Sensor,SEN-EQ-COB-1-3,toxic_gas,ppm,EQ-COB-1,Z-1,0.0,200.0,35.0,100.0
+SEN-EQ-COB-1-4,Coke Oven Battery Compressor 1 Pressure Sensor,SEN-EQ-COB-1-4,pressure,bar,EQ-COB-1,Z-1,0.0,100.0,70.0,90.0
+SEN-EQ-COB-2-1,Coke Oven Battery Steam Boiler 2 Pressure Sensor,SEN-EQ-COB-2-1,pressure,bar,EQ-COB-2,Z-1,0.0,100.0,70.0,90.0
+SEN-EQ-COB-2-2,Coke Oven Battery Steam Boiler 2 Temperature Sensor,SEN-EQ-COB-2-2,temperature,°C,EQ-COB-2,Z-1,0.0,1000.0,800.0,950.0
+SEN-EQ-COB-3-1,Coke Oven Battery Compressor 3 Temperature Sensor,SEN-EQ-COB-3-1,temperature,°C,EQ-COB-3,Z-1,0.0,1000.0,800.0,950.0
+SEN-EQ-COB-3-2,Coke Oven Battery Compressor 3 Toxic gas Sensor,SEN-EQ-COB-3-2,toxic_gas,ppm,EQ-COB-3,Z-1,0.0,200.0,35.0,100.0
+SEN-EQ-COB-4-1,Coke Oven Battery Extractor Fan 4 Temperature Sensor,SEN-EQ-COB-4-1,temperature,°C,EQ-COB-4,Z-1,0.0,1000.0,800.0,950.0
+SEN-EQ-COB-4-2,Coke Oven Battery Extractor Fan 4 Toxic gas Sensor,SEN-EQ-COB-4-2,toxic_gas,ppm,EQ-COB-4,Z-1,0.0,200.0,35.0,100.0
+SEN-EQ-COB-4-3,Coke Oven Battery Extractor Fan 4 Combustible gas Sensor,SEN-EQ-COB-4-3,combustible_gas,LEL%,EQ-COB-4,Z-1,0.0,100.0,20.0,40.0
+SEN-EQ-COB-5-1,Coke Oven Battery Steam Boiler 5 Ventilation Sensor,SEN-EQ-COB-5-1,ventilation,%,EQ-COB-5,Z-1,0.0,100.0,70.0,50.0
+SEN-EQ-COB-5-2,Coke Oven Battery Steam Boiler 5 Pressure Sensor,SEN-EQ-COB-5-2,pressure,bar,EQ-COB-5,Z-1,0.0,100.0,70.0,90.0
+SEN-EQ-COB-5-3,Coke Oven Battery Steam Boiler 5 Combustible gas Sensor,SEN-EQ-COB-5-3,combustible_gas,LEL%,EQ-COB-5,Z-1,0.0,100.0,20.0,40.0
+SEN-EQ-COB-6-1,Coke Oven Battery Valve Block 6 Vibration Sensor,SEN-EQ-COB-6-1,vibration,mm/s,EQ-COB-6,Z-1,0.0,20.0,5.0,10.0
+SEN-EQ-COB-6-2,Coke Oven Battery Valve Block 6 Pressure Sensor,SEN-EQ-COB-6-2,pressure,bar,EQ-COB-6,Z-1,0.0,100.0,70.0,90.0
+SEN-EQ-COB-7-1,Coke Oven Battery Storage Tank 7 Combustible gas Sensor,SEN-EQ-COB-7-1,combustible_gas,LEL%,EQ-COB-7,Z-1,0.0,100.0,20.0,40.0
+SEN-EQ-COB-7-2,Coke Oven Battery Storage Tank 7 Toxic gas Sensor,SEN-EQ-COB-7-2,toxic_gas,ppm,EQ-COB-7,Z-1,0.0,200.0,35.0,100.0
+SEN-EQ-BF-1-1,Blast Furnace Valve Block 1 Temperature Sensor,SEN-EQ-BF-1-1,temperature,°C,EQ-BF-1,Z-2,0.0,1000.0,800.0,950.0
+SEN-EQ-BF-1-2,Blast Furnace Valve Block 1 Ventilation Sensor,SEN-EQ-BF-1-2,ventilation,%,EQ-BF-1,Z-2,0.0,100.0,70.0,50.0
+SEN-EQ-BF-2-1,Blast Furnace Steam Boiler 2 Toxic gas Sensor,SEN-EQ-BF-2-1,toxic_gas,ppm,EQ-BF-2,Z-2,0.0,200.0,35.0,100.0
+SEN-EQ-BF-2-2,Blast Furnace Steam Boiler 2 Temperature Sensor,SEN-EQ-BF-2-2,temperature,°C,EQ-BF-2,Z-2,0.0,1000.0,800.0,950.0
+SEN-EQ-BF-2-3,Blast Furnace Steam Boiler 2 Combustible gas Sensor,SEN-EQ-BF-2-3,combustible_gas,LEL%,EQ-BF-2,Z-2,0.0,100.0,20.0,40.0
+SEN-EQ-BF-3-1,Blast Furnace Valve Block 3 Temperature Sensor,SEN-EQ-BF-3-1,temperature,°C,EQ-BF-3,Z-2,0.0,1000.0,800.0,950.0
+SEN-EQ-BF-3-2,Blast Furnace Valve Block 3 Combustible gas Sensor,SEN-EQ-BF-3-2,combustible_gas,LEL%,EQ-BF-3,Z-2,0.0,100.0,20.0,40.0
+SEN-EQ-BF-4-1,Blast Furnace Conveyor Belt 4 Oxygen Sensor,SEN-EQ-BF-4-1,oxygen,%,EQ-BF-4,Z-2,0.0,25.0,19.5,18.0
+SEN-EQ-BF-4-2,Blast Furnace Conveyor Belt 4 Temperature Sensor,SEN-EQ-BF-4-2,temperature,°C,EQ-BF-4,Z-2,0.0,1000.0,800.0,950.0
+SEN-EQ-BF-4-3,Blast Furnace Conveyor Belt 4 Ventilation Sensor,SEN-EQ-BF-4-3,ventilation,%,EQ-BF-4,Z-2,0.0,100.0,70.0,50.0
+SEN-EQ-BF-5-1,Blast Furnace Turbine Generator 5 Vibration Sensor,SEN-EQ-BF-5-1,vibration,mm/s,EQ-BF-5,Z-2,0.0,20.0,5.0,10.0
+SEN-EQ-BF-5-2,Blast Furnace Turbine Generator 5 Ventilation Sensor,SEN-EQ-BF-5-2,ventilation,%,EQ-BF-5,Z-2,0.0,100.0,70.0,50.0
+SEN-EQ-BF-5-3,Blast Furnace Turbine Generator 5 Pressure Sensor,SEN-EQ-BF-5-3,pressure,bar,EQ-BF-5,Z-2,0.0,100.0,70.0,90.0
+SEN-EQ-GS-1-1,Gas Storage Facility Compressor 1 Vibration Sensor,SEN-EQ-GS-1-1,vibration,mm/s,EQ-GS-1,Z-3,0.0,20.0,5.0,10.0
+SEN-EQ-GS-1-2,Gas Storage Facility Compressor 1 Temperature Sensor,SEN-EQ-GS-1-2,temperature,°C,EQ-GS-1,Z-3,0.0,1000.0,800.0,950.0
+SEN-EQ-GS-1-3,Gas Storage Facility Compressor 1 Toxic gas Sensor,SEN-EQ-GS-1-3,toxic_gas,ppm,EQ-GS-1,Z-3,0.0,200.0,35.0,100.0
+SEN-EQ-GS-1-4,Gas Storage Facility Compressor 1 Pressure Sensor,SEN-EQ-GS-1-4,pressure,bar,EQ-GS-1,Z-3,0.0,100.0,70.0,90.0
+SEN-EQ-GS-2-1,Gas Storage Facility Conveyor Belt 2 Toxic gas Sensor,SEN-EQ-GS-2-1,toxic_gas,ppm,EQ-GS-2,Z-3,0.0,200.0,35.0,100.0
+SEN-EQ-GS-2-2,Gas Storage Facility Conveyor Belt 2 Combustible gas Sensor,SEN-EQ-GS-2-2,combustible_gas,LEL%,EQ-GS-2,Z-3,0.0,100.0,20.0,40.0
+SEN-EQ-GS-2-3,Gas Storage Facility Conveyor Belt 2 Pressure Sensor,SEN-EQ-GS-2-3,pressure,bar,EQ-GS-2,Z-3,0.0,100.0,70.0,90.0
+SEN-EQ-GS-3-1,Gas Storage Facility Extractor Fan 3 Pressure Sensor,SEN-EQ-GS-3-1,pressure,bar,EQ-GS-3,Z-3,0.0,100.0,70.0,90.0
+SEN-EQ-GS-3-2,Gas Storage Facility Extractor Fan 3 Combustible gas Sensor,SEN-EQ-GS-3-2,combustible_gas,LEL%,EQ-GS-3,Z-3,0.0,100.0,20.0,40.0
+SEN-EQ-GS-3-3,Gas Storage Facility Extractor Fan 3 Oxygen Sensor,SEN-EQ-GS-3-3,oxygen,%,EQ-GS-3,Z-3,0.0,25.0,19.5,18.0
+SEN-EQ-GS-3-4,Gas Storage Facility Extractor Fan 3 Vibration Sensor,SEN-EQ-GS-3-4,vibration,mm/s,EQ-GS-3,Z-3,0.0,20.0,5.0,10.0
+SEN-EQ-GS-4-1,Gas Storage Facility Compressor 4 Pressure Sensor,SEN-EQ-GS-4-1,pressure,bar,EQ-GS-4,Z-3,0.0,100.0,70.0,90.0
+SEN-EQ-GS-4-2,Gas Storage Facility Compressor 4 Temperature Sensor,SEN-EQ-GS-4-2,temperature,°C,EQ-GS-4,Z-3,0.0,1000.0,800.0,950.0
+SEN-EQ-GS-5-1,Gas Storage Facility Valve Block 5 Ventilation Sensor,SEN-EQ-GS-5-1,ventilation,%,EQ-GS-5,Z-3,0.0,100.0,70.0,50.0
+SEN-EQ-GS-5-2,Gas Storage Facility Valve Block 5 Pressure Sensor,SEN-EQ-GS-5-2,pressure,bar,EQ-GS-5,Z-3,0.0,100.0,70.0,90.0
+SEN-EQ-GS-5-3,Gas Storage Facility Valve Block 5 Toxic gas Sensor,SEN-EQ-GS-5-3,toxic_gas,ppm,EQ-GS-5,Z-3,0.0,200.0,35.0,100.0
+SEN-EQ-GS-5-4,Gas Storage Facility Valve Block 5 Combustible gas Sensor,SEN-EQ-GS-5-4,combustible_gas,LEL%,EQ-GS-5,Z-3,0.0,100.0,20.0,40.0
+SEN-EQ-GS-6-1,Gas Storage Facility Conveyor Belt 6 Combustible gas Sensor,SEN-EQ-GS-6-1,combustible_gas,LEL%,EQ-GS-6,Z-3,0.0,100.0,20.0,40.0
+SEN-EQ-GS-6-2,Gas Storage Facility Conveyor Belt 6 Toxic gas Sensor,SEN-EQ-GS-6-2,toxic_gas,ppm,EQ-GS-6,Z-3,0.0,200.0,35.0,100.0
+SEN-EQ-GS-6-3,Gas Storage Facility Conveyor Belt 6 Ventilation Sensor,SEN-EQ-GS-6-3,ventilation,%,EQ-GS-6,Z-3,0.0,100.0,70.0,50.0
+SEN-EQ-GS-6-4,Gas Storage Facility Conveyor Belt 6 Pressure Sensor,SEN-EQ-GS-6-4,pressure,bar,EQ-GS-6,Z-3,0.0,100.0,70.0,90.0
+SEN-EQ-BH-1-1,Boiler House Storage Tank 1 Ventilation Sensor,SEN-EQ-BH-1-1,ventilation,%,EQ-BH-1,Z-4,0.0,100.0,70.0,50.0
+SEN-EQ-BH-1-2,Boiler House Storage Tank 1 Toxic gas Sensor,SEN-EQ-BH-1-2,toxic_gas,ppm,EQ-BH-1,Z-4,0.0,200.0,35.0,100.0
+SEN-EQ-BH-1-3,Boiler House Storage Tank 1 Temperature Sensor,SEN-EQ-BH-1-3,temperature,°C,EQ-BH-1,Z-4,0.0,1000.0,800.0,950.0
+SEN-EQ-BH-1-4,Boiler House Storage Tank 1 Combustible gas Sensor,SEN-EQ-BH-1-4,combustible_gas,LEL%,EQ-BH-1,Z-4,0.0,100.0,20.0,40.0
+SEN-EQ-BH-2-1,Boiler House Preheater 2 Toxic gas Sensor,SEN-EQ-BH-2-1,toxic_gas,ppm,EQ-BH-2,Z-4,0.0,200.0,35.0,100.0
+SEN-EQ-BH-2-2,Boiler House Preheater 2 Pressure Sensor,SEN-EQ-BH-2-2,pressure,bar,EQ-BH-2,Z-4,0.0,100.0,70.0,90.0
+SEN-EQ-BH-2-3,Boiler House Preheater 2 Vibration Sensor,SEN-EQ-BH-2-3,vibration,mm/s,EQ-BH-2,Z-4,0.0,20.0,5.0,10.0
+SEN-EQ-BH-2-4,Boiler House Preheater 2 Combustible gas Sensor,SEN-EQ-BH-2-4,combustible_gas,LEL%,EQ-BH-2,Z-4,0.0,100.0,20.0,40.0
+SEN-EQ-BH-3-1,Boiler House Valve Block 3 Combustible gas Sensor,SEN-EQ-BH-3-1,combustible_gas,LEL%,EQ-BH-3,Z-4,0.0,100.0,20.0,40.0
+SEN-EQ-BH-3-2,Boiler House Valve Block 3 Temperature Sensor,SEN-EQ-BH-3-2,temperature,°C,EQ-BH-3,Z-4,0.0,1000.0,800.0,950.0
+SEN-EQ-BH-3-3,Boiler House Valve Block 3 Pressure Sensor,SEN-EQ-BH-3-3,pressure,bar,EQ-BH-3,Z-4,0.0,100.0,70.0,90.0
+SEN-EQ-BH-3-4,Boiler House Valve Block 3 Oxygen Sensor,SEN-EQ-BH-3-4,oxygen,%,EQ-BH-3,Z-4,0.0,25.0,19.5,18.0
+SEN-EQ-BH-4-1,Boiler House Steam Boiler 4 Toxic gas Sensor,SEN-EQ-BH-4-1,toxic_gas,ppm,EQ-BH-4,Z-4,0.0,200.0,35.0,100.0
+SEN-EQ-BH-4-2,Boiler House Steam Boiler 4 Vibration Sensor,SEN-EQ-BH-4-2,vibration,mm/s,EQ-BH-4,Z-4,0.0,20.0,5.0,10.0
+SEN-EQ-BH-4-3,Boiler House Steam Boiler 4 Oxygen Sensor,SEN-EQ-BH-4-3,oxygen,%,EQ-BH-4,Z-4,0.0,25.0,19.5,18.0
+SEN-EQ-BH-5-1,Boiler House Extractor Fan 5 Oxygen Sensor,SEN-EQ-BH-5-1,oxygen,%,EQ-BH-5,Z-4,0.0,25.0,19.5,18.0
+SEN-EQ-BH-5-2,Boiler House Extractor Fan 5 Temperature Sensor,SEN-EQ-BH-5-2,temperature,°C,EQ-BH-5,Z-4,0.0,1000.0,800.0,950.0
+SEN-EQ-MW-1-1,Maintenance Workshop Valve Block 1 Vibration Sensor,SEN-EQ-MW-1-1,vibration,mm/s,EQ-MW-1,Z-5,0.0,20.0,5.0,10.0
+SEN-EQ-MW-1-2,Maintenance Workshop Valve Block 1 Ventilation Sensor,SEN-EQ-MW-1-2,ventilation,%,EQ-MW-1,Z-5,0.0,100.0,70.0,50.0
+SEN-EQ-MW-2-1,Maintenance Workshop Conveyor Belt 2 Temperature Sensor,SEN-EQ-MW-2-1,temperature,°C,EQ-MW-2,Z-5,0.0,1000.0,800.0,950.0
+SEN-EQ-MW-2-2,Maintenance Workshop Conveyor Belt 2 Oxygen Sensor,SEN-EQ-MW-2-2,oxygen,%,EQ-MW-2,Z-5,0.0,25.0,19.5,18.0
+SEN-EQ-MW-2-3,Maintenance Workshop Conveyor Belt 2 Combustible gas Sensor,SEN-EQ-MW-2-3,combustible_gas,LEL%,EQ-MW-2,Z-5,0.0,100.0,20.0,40.0
+SEN-EQ-MW-3-1,Maintenance Workshop Valve Block 3 Temperature Sensor,SEN-EQ-MW-3-1,temperature,°C,EQ-MW-3,Z-5,0.0,1000.0,800.0,950.0
+SEN-EQ-MW-3-2,Maintenance Workshop Valve Block 3 Pressure Sensor,SEN-EQ-MW-3-2,pressure,bar,EQ-MW-3,Z-5,0.0,100.0,70.0,90.0
+SEN-EQ-MW-4-1,Maintenance Workshop Preheater 4 Combustible gas Sensor,SEN-EQ-MW-4-1,combustible_gas,LEL%,EQ-MW-4,Z-5,0.0,100.0,20.0,40.0
+SEN-EQ-MW-4-2,Maintenance Workshop Preheater 4 Ventilation Sensor,SEN-EQ-MW-4-2,ventilation,%,EQ-MW-4,Z-5,0.0,100.0,70.0,50.0
+SEN-EQ-MW-4-3,Maintenance Workshop Preheater 4 Pressure Sensor,SEN-EQ-MW-4-3,pressure,bar,EQ-MW-4,Z-5,0.0,100.0,70.0,90.0
+SEN-EQ-MW-4-4,Maintenance Workshop Preheater 4 Toxic gas Sensor,SEN-EQ-MW-4-4,toxic_gas,ppm,EQ-MW-4,Z-5,0.0,200.0,35.0,100.0
+SEN-EQ-MW-5-1,Maintenance Workshop Storage Tank 5 Oxygen Sensor,SEN-EQ-MW-5-1,oxygen,%,EQ-MW-5,Z-5,0.0,25.0,19.5,18.0
+SEN-EQ-MW-5-2,Maintenance Workshop Storage Tank 5 Toxic gas Sensor,SEN-EQ-MW-5-2,toxic_gas,ppm,EQ-MW-5,Z-5,0.0,200.0,35.0,100.0
+SEN-EQ-MW-5-3,Maintenance Workshop Storage Tank 5 Ventilation Sensor,SEN-EQ-MW-5-3,ventilation,%,EQ-MW-5,Z-5,0.0,100.0,70.0,50.0
+SEN-EQ-MW-5-4,Maintenance Workshop Storage Tank 5 Combustible gas Sensor,SEN-EQ-MW-5-4,combustible_gas,LEL%,EQ-MW-5,Z-5,0.0,100.0,20.0,40.0
+SEN-EQ-MW-6-1,Maintenance Workshop Valve Block 6 Oxygen Sensor,SEN-EQ-MW-6-1,oxygen,%,EQ-MW-6,Z-5,0.0,25.0,19.5,18.0
+SEN-EQ-MW-6-2,Maintenance Workshop Valve Block 6 Ventilation Sensor,SEN-EQ-MW-6-2,ventilation,%,EQ-MW-6,Z-5,0.0,100.0,70.0,50.0
+SEN-EQ-CS-1-1,Compressor Station Turbine Generator 1 Temperature Sensor,SEN-EQ-CS-1-1,temperature,°C,EQ-CS-1,Z-6,0.0,1000.0,800.0,950.0
+SEN-EQ-CS-1-2,Compressor Station Turbine Generator 1 Pressure Sensor,SEN-EQ-CS-1-2,pressure,bar,EQ-CS-1,Z-6,0.0,100.0,70.0,90.0
+SEN-EQ-CS-2-1,Compressor Station Compressor 2 Oxygen Sensor,SEN-EQ-CS-2-1,oxygen,%,EQ-CS-2,Z-6,0.0,25.0,19.5,18.0
+SEN-EQ-CS-2-2,Compressor Station Compressor 2 Pressure Sensor,SEN-EQ-CS-2-2,pressure,bar,EQ-CS-2,Z-6,0.0,100.0,70.0,90.0
+SEN-EQ-CS-2-3,Compressor Station Compressor 2 Vibration Sensor,SEN-EQ-CS-2-3,vibration,mm/s,EQ-CS-2,Z-6,0.0,20.0,5.0,10.0
+SEN-EQ-CS-2-4,Compressor Station Compressor 2 Combustible gas Sensor,SEN-EQ-CS-2-4,combustible_gas,LEL%,EQ-CS-2,Z-6,0.0,100.0,20.0,40.0
+SEN-EQ-CS-3-1,Compressor Station Valve Block 3 Ventilation Sensor,SEN-EQ-CS-3-1,ventilation,%,EQ-CS-3,Z-6,0.0,100.0,70.0,50.0
+SEN-EQ-CS-3-2,Compressor Station Valve Block 3 Pressure Sensor,SEN-EQ-CS-3-2,pressure,bar,EQ-CS-3,Z-6,0.0,100.0,70.0,90.0
+SEN-EQ-CS-3-3,Compressor Station Valve Block 3 Oxygen Sensor,SEN-EQ-CS-3-3,oxygen,%,EQ-CS-3,Z-6,0.0,25.0,19.5,18.0
+SEN-EQ-CS-3-4,Compressor Station Valve Block 3 Combustible gas Sensor,SEN-EQ-CS-3-4,combustible_gas,LEL%,EQ-CS-3,Z-6,0.0,100.0,20.0,40.0
+SEN-EQ-CS-4-1,Compressor Station Turbine Generator 4 Oxygen Sensor,SEN-EQ-CS-4-1,oxygen,%,EQ-CS-4,Z-6,0.0,25.0,19.5,18.0
+SEN-EQ-CS-4-2,Compressor Station Turbine Generator 4 Combustible gas Sensor,SEN-EQ-CS-4-2,combustible_gas,LEL%,EQ-CS-4,Z-6,0.0,100.0,20.0,40.0
+SEN-EQ-CS-5-1,Compressor Station Extractor Fan 5 Vibration Sensor,SEN-EQ-CS-5-1,vibration,mm/s,EQ-CS-5,Z-6,0.0,20.0,5.0,10.0
+SEN-EQ-CS-5-2,Compressor Station Extractor Fan 5 Pressure Sensor,SEN-EQ-CS-5-2,pressure,bar,EQ-CS-5,Z-6,0.0,100.0,70.0,90.0
+SEN-EQ-RMH-1-1,Raw Material Handling Storage Tank 1 Oxygen Sensor,SEN-EQ-RMH-1-1,oxygen,%,EQ-RMH-1,Z-7,0.0,25.0,19.5,18.0
+SEN-EQ-RMH-1-2,Raw Material Handling Storage Tank 1 Ventilation Sensor,SEN-EQ-RMH-1-2,ventilation,%,EQ-RMH-1,Z-7,0.0,100.0,70.0,50.0
+SEN-EQ-RMH-2-1,Raw Material Handling Valve Block 2 Toxic gas Sensor,SEN-EQ-RMH-2-1,toxic_gas,ppm,EQ-RMH-2,Z-7,0.0,200.0,35.0,100.0
+SEN-EQ-RMH-2-2,Raw Material Handling Valve Block 2 Vibration Sensor,SEN-EQ-RMH-2-2,vibration,mm/s,EQ-RMH-2,Z-7,0.0,20.0,5.0,10.0
+SEN-EQ-RMH-2-3,Raw Material Handling Valve Block 2 Oxygen Sensor,SEN-EQ-RMH-2-3,oxygen,%,EQ-RMH-2,Z-7,0.0,25.0,19.5,18.0
+SEN-EQ-RMH-2-4,Raw Material Handling Valve Block 2 Ventilation Sensor,SEN-EQ-RMH-2-4,ventilation,%,EQ-RMH-2,Z-7,0.0,100.0,70.0,50.0
+SEN-EQ-RMH-3-1,Raw Material Handling Storage Tank 3 Vibration Sensor,SEN-EQ-RMH-3-1,vibration,mm/s,EQ-RMH-3,Z-7,0.0,20.0,5.0,10.0
+SEN-EQ-RMH-3-2,Raw Material Handling Storage Tank 3 Oxygen Sensor,SEN-EQ-RMH-3-2,oxygen,%,EQ-RMH-3,Z-7,0.0,25.0,19.5,18.0
+SEN-EQ-RMH-3-3,Raw Material Handling Storage Tank 3 Pressure Sensor,SEN-EQ-RMH-3-3,pressure,bar,EQ-RMH-3,Z-7,0.0,100.0,70.0,90.0
+SEN-EQ-RMH-3-4,Raw Material Handling Storage Tank 3 Temperature Sensor,SEN-EQ-RMH-3-4,temperature,°C,EQ-RMH-3,Z-7,0.0,1000.0,800.0,950.0
+SEN-EQ-RMH-4-1,Raw Material Handling Compressor 4 Ventilation Sensor,SEN-EQ-RMH-4-1,ventilation,%,EQ-RMH-4,Z-7,0.0,100.0,70.0,50.0
+SEN-EQ-RMH-4-2,Raw Material Handling Compressor 4 Combustible gas Sensor,SEN-EQ-RMH-4-2,combustible_gas,LEL%,EQ-RMH-4,Z-7,0.0,100.0,20.0,40.0
+SEN-EQ-RMH-4-3,Raw Material Handling Compressor 4 Vibration Sensor,SEN-EQ-RMH-4-3,vibration,mm/s,EQ-RMH-4,Z-7,0.0,20.0,5.0,10.0
+SEN-EQ-RMH-5-1,Raw Material Handling Steam Boiler 5 Temperature Sensor,SEN-EQ-RMH-5-1,temperature,°C,EQ-RMH-5,Z-7,0.0,1000.0,800.0,950.0
+SEN-EQ-RMH-5-2,Raw Material Handling Steam Boiler 5 Oxygen Sensor,SEN-EQ-RMH-5-2,oxygen,%,EQ-RMH-5,Z-7,0.0,25.0,19.5,18.0
+SEN-EQ-RMH-5-3,Raw Material Handling Steam Boiler 5 Combustible gas Sensor,SEN-EQ-RMH-5-3,combustible_gas,LEL%,EQ-RMH-5,Z-7,0.0,100.0,20.0,40.0
+SEN-EQ-RMH-5-4,Raw Material Handling Steam Boiler 5 Pressure Sensor,SEN-EQ-RMH-5-4,pressure,bar,EQ-RMH-5,Z-7,0.0,100.0,70.0,90.0
+SEN-EQ-RMH-6-1,Raw Material Handling Preheater 6 Ventilation Sensor,SEN-EQ-RMH-6-1,ventilation,%,EQ-RMH-6,Z-7,0.0,100.0,70.0,50.0
+SEN-EQ-RMH-6-2,Raw Material Handling Preheater 6 Toxic gas Sensor,SEN-EQ-RMH-6-2,toxic_gas,ppm,EQ-RMH-6,Z-7,0.0,200.0,35.0,100.0
+SEN-EQ-RMH-6-3,Raw Material Handling Preheater 6 Oxygen Sensor,SEN-EQ-RMH-6-3,oxygen,%,EQ-RMH-6,Z-7,0.0,25.0,19.5,18.0
+SEN-EQ-RMH-7-1,Raw Material Handling Turbine Generator 7 Vibration Sensor,SEN-EQ-RMH-7-1,vibration,mm/s,EQ-RMH-7,Z-7,0.0,20.0,5.0,10.0
+SEN-EQ-RMH-7-2,Raw Material Handling Turbine Generator 7 Temperature Sensor,SEN-EQ-RMH-7-2,temperature,°C,EQ-RMH-7,Z-7,0.0,1000.0,800.0,950.0
+SEN-EQ-WH-1-1,Warehouse Logistics Storage Tank 1 Vibration Sensor,SEN-EQ-WH-1-1,vibration,mm/s,EQ-WH-1,Z-8,0.0,20.0,5.0,10.0
+SEN-EQ-WH-1-2,Warehouse Logistics Storage Tank 1 Temperature Sensor,SEN-EQ-WH-1-2,temperature,°C,EQ-WH-1,Z-8,0.0,1000.0,800.0,950.0
+SEN-EQ-WH-1-3,Warehouse Logistics Storage Tank 1 Pressure Sensor,SEN-EQ-WH-1-3,pressure,bar,EQ-WH-1,Z-8,0.0,100.0,70.0,90.0
+SEN-EQ-WH-1-4,Warehouse Logistics Storage Tank 1 Combustible gas Sensor,SEN-EQ-WH-1-4,combustible_gas,LEL%,EQ-WH-1,Z-8,0.0,100.0,20.0,40.0
+SEN-EQ-WH-2-1,Warehouse Logistics Compressor 2 Combustible gas Sensor,SEN-EQ-WH-2-1,combustible_gas,LEL%,EQ-WH-2,Z-8,0.0,100.0,20.0,40.0
+SEN-EQ-WH-2-2,Warehouse Logistics Compressor 2 Vibration Sensor,SEN-EQ-WH-2-2,vibration,mm/s,EQ-WH-2,Z-8,0.0,20.0,5.0,10.0
+SEN-EQ-WH-3-1,Warehouse Logistics Compressor 3 Pressure Sensor,SEN-EQ-WH-3-1,pressure,bar,EQ-WH-3,Z-8,0.0,100.0,70.0,90.0
+SEN-EQ-WH-3-2,Warehouse Logistics Compressor 3 Combustible gas Sensor,SEN-EQ-WH-3-2,combustible_gas,LEL%,EQ-WH-3,Z-8,0.0,100.0,20.0,40.0
+SEN-EQ-WH-4-1,Warehouse Logistics Turbine Generator 4 Pressure Sensor,SEN-EQ-WH-4-1,pressure,bar,EQ-WH-4,Z-8,0.0,100.0,70.0,90.0
+SEN-EQ-WH-4-2,Warehouse Logistics Turbine Generator 4 Ventilation Sensor,SEN-EQ-WH-4-2,ventilation,%,EQ-WH-4,Z-8,0.0,100.0,70.0,50.0
+SEN-EQ-WH-4-3,Warehouse Logistics Turbine Generator 4 Toxic gas Sensor,SEN-EQ-WH-4-3,toxic_gas,ppm,EQ-WH-4,Z-8,0.0,200.0,35.0,100.0
+SEN-EQ-WH-5-1,Warehouse Logistics Valve Block 5 Toxic gas Sensor,SEN-EQ-WH-5-1,toxic_gas,ppm,EQ-WH-5,Z-8,0.0,200.0,35.0,100.0
+SEN-EQ-WH-5-2,Warehouse Logistics Valve Block 5 Combustible gas Sensor,SEN-EQ-WH-5-2,combustible_gas,LEL%,EQ-WH-5,Z-8,0.0,100.0,20.0,40.0
+SEN-EQ-WH-5-3,Warehouse Logistics Valve Block 5 Oxygen Sensor,SEN-EQ-WH-5-3,oxygen,%,EQ-WH-5,Z-8,0.0,25.0,19.5,18.0
+SEN-EQ-WH-6-1,Warehouse Logistics Steam Boiler 6 Ventilation Sensor,SEN-EQ-WH-6-1,ventilation,%,EQ-WH-6,Z-8,0.0,100.0,70.0,50.0
+SEN-EQ-WH-6-2,Warehouse Logistics Steam Boiler 6 Combustible gas Sensor,SEN-EQ-WH-6-2,combustible_gas,LEL%,EQ-WH-6,Z-8,0.0,100.0,20.0,40.0
+SEN-EQ-WH-6-3,Warehouse Logistics Steam Boiler 6 Oxygen Sensor,SEN-EQ-WH-6-3,oxygen,%,EQ-WH-6,Z-8,0.0,25.0,19.5,18.0
+SEN-EQ-UA-1-1,Utilities Area Conveyor Belt 1 Vibration Sensor,SEN-EQ-UA-1-1,vibration,mm/s,EQ-UA-1,Z-9,0.0,20.0,5.0,10.0
+SEN-EQ-UA-1-2,Utilities Area Conveyor Belt 1 Toxic gas Sensor,SEN-EQ-UA-1-2,toxic_gas,ppm,EQ-UA-1,Z-9,0.0,200.0,35.0,100.0
+SEN-EQ-UA-2-1,Utilities Area Turbine Generator 2 Combustible gas Sensor,SEN-EQ-UA-2-1,combustible_gas,LEL%,EQ-UA-2,Z-9,0.0,100.0,20.0,40.0
+SEN-EQ-UA-2-2,Utilities Area Turbine Generator 2 Oxygen Sensor,SEN-EQ-UA-2-2,oxygen,%,EQ-UA-2,Z-9,0.0,25.0,19.5,18.0
+SEN-EQ-UA-2-3,Utilities Area Turbine Generator 2 Pressure Sensor,SEN-EQ-UA-2-3,pressure,bar,EQ-UA-2,Z-9,0.0,100.0,70.0,90.0
+SEN-EQ-UA-2-4,Utilities Area Turbine Generator 2 Temperature Sensor,SEN-EQ-UA-2-4,temperature,°C,EQ-UA-2,Z-9,0.0,1000.0,800.0,950.0
+SEN-EQ-UA-3-1,Utilities Area Compressor 3 Vibration Sensor,SEN-EQ-UA-3-1,vibration,mm/s,EQ-UA-3,Z-9,0.0,20.0,5.0,10.0
+SEN-EQ-UA-3-2,Utilities Area Compressor 3 Toxic gas Sensor,SEN-EQ-UA-3-2,toxic_gas,ppm,EQ-UA-3,Z-9,0.0,200.0,35.0,100.0
+SEN-EQ-UA-3-3,Utilities Area Compressor 3 Ventilation Sensor,SEN-EQ-UA-3-3,ventilation,%,EQ-UA-3,Z-9,0.0,100.0,70.0,50.0
+SEN-EQ-UA-3-4,Utilities Area Compressor 3 Pressure Sensor,SEN-EQ-UA-3-4,pressure,bar,EQ-UA-3,Z-9,0.0,100.0,70.0,90.0
+SEN-EQ-UA-4-1,Utilities Area Steam Boiler 4 Temperature Sensor,SEN-EQ-UA-4-1,temperature,°C,EQ-UA-4,Z-9,0.0,1000.0,800.0,950.0
+SEN-EQ-UA-4-2,Utilities Area Steam Boiler 4 Combustible gas Sensor,SEN-EQ-UA-4-2,combustible_gas,LEL%,EQ-UA-4,Z-9,0.0,100.0,20.0,40.0
+SEN-EQ-UA-5-1,Utilities Area Extractor Fan 5 Vibration Sensor,SEN-EQ-UA-5-1,vibration,mm/s,EQ-UA-5,Z-9,0.0,20.0,5.0,10.0
+SEN-EQ-UA-5-2,Utilities Area Extractor Fan 5 Oxygen Sensor,SEN-EQ-UA-5-2,oxygen,%,EQ-UA-5,Z-9,0.0,25.0,19.5,18.0
+SEN-EQ-UA-6-1,Utilities Area Extractor Fan 6 Ventilation Sensor,SEN-EQ-UA-6-1,ventilation,%,EQ-UA-6,Z-9,0.0,100.0,70.0,50.0
+SEN-EQ-UA-6-2,Utilities Area Extractor Fan 6 Vibration Sensor,SEN-EQ-UA-6-2,vibration,mm/s,EQ-UA-6,Z-9,0.0,20.0,5.0,10.0
+SEN-EQ-UA-6-3,Utilities Area Extractor Fan 6 Toxic gas Sensor,SEN-EQ-UA-6-3,toxic_gas,ppm,EQ-UA-6,Z-9,0.0,200.0,35.0,100.0
+SEN-EQ-UA-7-1,Utilities Area Steam Boiler 7 Toxic gas Sensor,SEN-EQ-UA-7-1,toxic_gas,ppm,EQ-UA-7,Z-9,0.0,200.0,35.0,100.0
+SEN-EQ-UA-7-2,Utilities Area Steam Boiler 7 Vibration Sensor,SEN-EQ-UA-7-2,vibration,mm/s,EQ-UA-7,Z-9,0.0,20.0,5.0,10.0
+SEN-EQ-UA-7-3,Utilities Area Steam Boiler 7 Combustible gas Sensor,SEN-EQ-UA-7-3,combustible_gas,LEL%,EQ-UA-7,Z-9,0.0,100.0,20.0,40.0
+SEN-EQ-CR-1-1,Control Room Hub Preheater 1 Ventilation Sensor,SEN-EQ-CR-1-1,ventilation,%,EQ-CR-1,Z-10,0.0,100.0,70.0,50.0
+SEN-EQ-CR-1-2,Control Room Hub Preheater 1 Combustible gas Sensor,SEN-EQ-CR-1-2,combustible_gas,LEL%,EQ-CR-1,Z-10,0.0,100.0,20.0,40.0
+SEN-EQ-CR-1-3,Control Room Hub Preheater 1 Temperature Sensor,SEN-EQ-CR-1-3,temperature,°C,EQ-CR-1,Z-10,0.0,1000.0,800.0,950.0
+SEN-EQ-CR-2-1,Control Room Hub Turbine Generator 2 Toxic gas Sensor,SEN-EQ-CR-2-1,toxic_gas,ppm,EQ-CR-2,Z-10,0.0,200.0,35.0,100.0
+SEN-EQ-CR-2-2,Control Room Hub Turbine Generator 2 Temperature Sensor,SEN-EQ-CR-2-2,temperature,°C,EQ-CR-2,Z-10,0.0,1000.0,800.0,950.0
+SEN-EQ-CR-3-1,Control Room Hub Compressor 3 Oxygen Sensor,SEN-EQ-CR-3-1,oxygen,%,EQ-CR-3,Z-10,0.0,25.0,19.5,18.0
+SEN-EQ-CR-3-2,Control Room Hub Compressor 3 Toxic gas Sensor,SEN-EQ-CR-3-2,toxic_gas,ppm,EQ-CR-3,Z-10,0.0,200.0,35.0,100.0
+SEN-EQ-CR-3-3,Control Room Hub Compressor 3 Vibration Sensor,SEN-EQ-CR-3-3,vibration,mm/s,EQ-CR-3,Z-10,0.0,20.0,5.0,10.0
+SEN-EQ-CR-4-1,Control Room Hub Valve Block 4 Vibration Sensor,SEN-EQ-CR-4-1,vibration,mm/s,EQ-CR-4,Z-10,0.0,20.0,5.0,10.0
+SEN-EQ-CR-4-2,Control Room Hub Valve Block 4 Toxic gas Sensor,SEN-EQ-CR-4-2,toxic_gas,ppm,EQ-CR-4,Z-10,0.0,200.0,35.0,100.0
+SEN-EQ-CR-5-1,Control Room Hub Extractor Fan 5 Oxygen Sensor,SEN-EQ-CR-5-1,oxygen,%,EQ-CR-5,Z-10,0.0,25.0,19.5,18.0
+SEN-EQ-CR-5-2,Control Room Hub Extractor Fan 5 Ventilation Sensor,SEN-EQ-CR-5-2,ventilation,%,EQ-CR-5,Z-10,0.0,100.0,70.0,50.0
+SEN-EQ-CR-5-3,Control Room Hub Extractor Fan 5 Combustible gas Sensor,SEN-EQ-CR-5-3,combustible_gas,LEL%,EQ-CR-5,Z-10,0.0,100.0,20.0,40.0

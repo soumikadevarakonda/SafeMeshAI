@@ -1,0 +1,180 @@
+{
+  "project": "SafeMesh AI",
+  "generated_at": "2026-07-11T12:17:35.081378",
+  "files": {
+    "zones.csv": {
+      "row_count": 10,
+      "columns": [
+        "zone_id",
+        "name",
+        "code",
+        "coordinates"
+      ]
+    },
+    "equipment.csv": {
+      "row_count": 59,
+      "columns": [
+        "equipment_id",
+        "name",
+        "code",
+        "type",
+        "zone_id",
+        "health_score",
+        "status"
+      ]
+    },
+    "sensors.csv": {
+      "row_count": 172,
+      "columns": [
+        "sensor_id",
+        "name",
+        "code",
+        "type",
+        "unit",
+        "equipment_id",
+        "zone_id",
+        "min_value",
+        "max_value",
+        "threshold_warning",
+        "threshold_critical"
+      ]
+    },
+    "sensor_readings.csv": {
+      "row_count": 122125,
+      "columns": [
+        "timestamp",
+        "sensor_id",
+        "value"
+      ]
+    },
+    "workers.csv": {
+      "row_count": 250,
+      "columns": [
+        "worker_id",
+        "name",
+        "badge_number",
+        "role",
+        "status"
+      ]
+    },
+    "worker_locations.csv": {
+      "row_count": 4488,
+      "columns": [
+        "timestamp",
+        "worker_id",
+        "zone_id",
+        "event_type"
+      ]
+    },
+    "permits.csv": {
+      "row_count": 2200,
+      "columns": [
+        "permit_id",
+        "permit_number",
+        "type",
+        "zone_id",
+        "equipment_id",
+        "worker_id",
+        "status",
+        "start_time",
+        "end_time",
+        "hazards",
+        "controls"
+      ]
+    },
+    "maintenance_records.csv": {
+      "row_count": 5100,
+      "columns": [
+        "maintenance_id",
+        "equipment_id",
+        "worker_id",
+        "type",
+        "description",
+        "status",
+        "scheduled_date",
+        "completed_date"
+      ]
+    },
+    "shift_logs.csv": {
+      "row_count": 2400,
+      "columns": [
+        "shift_id",
+        "zone_id",
+        "log_text",
+        "handover_quality",
+        "timestamp"
+      ]
+    },
+    "incidents.csv": {
+      "row_count": 520,
+      "columns": [
+        "incident_id",
+        "title",
+        "description",
+        "date",
+        "zone_id",
+        "severity",
+        "root_cause",
+        "corrective_actions"
+      ]
+    },
+    "risk_rules.csv": {
+      "row_count": 3,
+      "columns": [
+        "rule_id",
+        "name",
+        "description"
+      ]
+    },
+    "compound_risk_windows.csv": {
+      "row_count": 10744,
+      "columns": [
+        "timestamp",
+        "zone_id",
+        "sensor_anomaly_score",
+        "active_permits",
+        "permit_overlap_count",
+        "has_hot_work",
+        "has_confined_space",
+        "has_electrical_isolation",
+        "simops_conflict",
+        "worker_count",
+        "worker_exposure_duration",
+        "maintenance_overdue",
+        "equipment_health_avg",
+        "recent_near_miss_count",
+        "shift_change",
+        "risk_score",
+        "is_incident_imminent",
+        "combustible_gas_val",
+        "combustible_gas_avg_30m",
+        "combustible_gas_std_30m",
+        "combustible_gas_slope_30m",
+        "toxic_gas_val",
+        "toxic_gas_avg_30m",
+        "toxic_gas_std_30m",
+        "toxic_gas_slope_30m",
+        "oxygen_val",
+        "oxygen_avg_30m",
+        "oxygen_std_30m",
+        "oxygen_slope_30m",
+        "ventilation_val",
+        "ventilation_avg_30m",
+        "ventilation_std_30m",
+        "ventilation_slope_30m",
+        "pressure_val",
+        "pressure_avg_30m",
+        "pressure_std_30m",
+        "pressure_slope_30m",
+        "vibration_val",
+        "vibration_avg_30m",
+        "vibration_std_30m",
+        "vibration_slope_30m",
+        "temperature_val",
+        "temperature_avg_30m",
+        "temperature_std_30m",
+        "temperature_slope_30m"
+      ]
+    }
+  }
+}

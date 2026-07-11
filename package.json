@@ -1,0 +1,33 @@
+{
+  "name": "safemesh-ai-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "SafeMesh AI - Industrial Safety Intelligence Platform",
+  "scripts": {
+    "install:all": "npm install && npm run install:backend && npm run install:frontend && npm run install:ai",
+    "install:backend": "cd backend && npm install",
+    "install:frontend": "cd frontend && npm install",
+    "install:ai": "python -m venv ai-service/.venv && ai-service/.venv/Scripts/pip install -r ai-service/requirements.txt",
+    "docker:db": "docker compose up -d mysql",
+    "db:migrate": "cd backend && npx prisma db push",
+    "db:seed": "cd backend && npx ts-node prisma/seed.ts",
+    "data:generate": "ai-service/.venv/Scripts/python -m app.scripts.generate_data",
+    "ml:train": "ai-service/.venv/Scripts/python -m app.scripts.train_models",
+    "rag:ingest": "ai-service/.venv/Scripts/python -m app.scripts.ingest_rag",
+    "evaluate": "ai-service/.venv/Scripts/python -m app.scripts.evaluate",
+    "bootstrap": "npm run docker:db && npm run db:migrate && npm run db:seed && npm run data:generate && npm run ml:train && npm run rag:ingest && npm run evaluate",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev:ai": "ai-service/.venv/Scripts/python -m uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\" \"npm run dev:ai\"",
+    "test": "npm run test:backend && npm run test:ai",
+    "test:backend": "cd backend && npm run test",
+    "test:ai": "ai-service/.venv/Scripts/pytest",
+    "build": "npm run build:backend && npm run build:frontend",
+    "build:backend": "cd backend && npm run build",
+    "build:frontend": "cd frontend && npm run build"
+  },
+  "dependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
