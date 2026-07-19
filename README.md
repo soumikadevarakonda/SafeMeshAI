@@ -10,18 +10,33 @@ Instead of triggering an alarm only when a single toxic or combustible gas senso
 
 ---
 
+## AI Safety Officer Decision Layer
+SafeMesh AI features a modular **AI Safety Officer Decision Layer** (`app/safety_officer.py`) that acts as an experienced industrial safety officer:
+1. **Sensor Intelligence**: Analyzes 30-minute sensor slopes and levels (gas, ventilation, vibration, pressure) to detect rising hazard trends.
+2. **Operational Intelligence**: Intercepts active permits, worker count, exposure times, and detects SIMOPS (simultaneous operations) conflicts.
+3. **Maintenance Intelligence**: Tracks asset health degradation and flags overdue safety maintenance schedules.
+4. **Historical Intelligence**: Matches current zone profiles against historical precedent cases (e.g., the Visakhapatnam 2025 blast).
+5. **Regulatory Intelligence**: Instantiates a local RAG engine (TF-IDF vector search) to fetch compliance rules, auditing current status against `SOP-COB-01` (welding rules) and `REG-CSF-12` (confined space rules).
+6. **Decision Intelligence**: Fuses all assessments into a unified **Decision Object** (Incident Summary, Observations, Reasoning, SOP compliance audits, similar incidents, and prioritized mitigations).
+
+---
+
 ## Monorepo Folder Structure
 
 ```
 safemesh-ai/
   ├── frontend/             # React (Vite + TypeScript + Tailwind CSS)
+  │     └── src/App.tsx     # CommandCenter dashboard, Live SVG Map, RAG Copilot, and Safety Officer Audit view
   ├── backend/              # Node.js Express service (Prisma + SQLite + Socket.IO)
+  │     ├── prisma/         # Schema defining RiskEvent, Sensor, Worker, Permit tables
+  │     └── src/services/   # Simulation loop and data synchronization pipelines
   ├── ai-service/           # Pure-Python ML and local RAG retrieval scripts
   │     ├── app/
   │     │    ├── scripts/   # Dataset generation, validation, training, and evaluation
+  │     │    ├── safety_officer.py # Modular Decision Layer (Sensor, Operational, Maintenance, RAG check)
   │     │    └── models.py  # Logistic Regression & anomaly detection models
   │     └── models/         # Serialized RAG indexes and model parameters JSON
-  ├── datasets/             # Local CSV databases and RAG safety documents
+  ├── datasets/             # Local CSV databases and RAG safety documents (SOPs, regulations)
   ├── tests/                # Playwright E2E and unit test configurations
   └── README.md             # Standard operation manual
 ```
@@ -111,18 +126,18 @@ Open your browser to: **`http://localhost:3000`**
 
 Follow these steps to demonstrate the SafeMesh AI platform to a reviewer:
 
-1. **Sign In**: Navigate to `http://localhost:3000`, click the `officer@safemesh.ai` helper shortcut, and sign in.
-2. **Dashboard**: Observe the Plant Safety Score starts at a healthy **92.5%** with 0 active critical risks.
+1. **Sign In**: Navigate to `http://localhost:3000` (or `http://localhost:3001`), click the `officer@safemesh.ai` helper shortcut, and sign in.
+2. **Dashboard**: Observe the Plant Safety Score starts at a healthy **92.5%** with 0 active critical risks. Check the **AI Safety Officer Decision Cycle Stepper** showing `"SYSTEM STATUS: SECURE MONITORING"` and inspect the **Fused Ingestion Channels** widget displaying the 8 active data feeds integrated into the AI reasoning loop (plus CCTV marked as "Coming Soon").
 3. **Trigger Simulation**: In the top header bar, click **Start Demo** to launch the **Coke Oven Gas Ignition** scenario.
 4. **Observe Escalation**:
-   - At **T+10 mins**, combustible gas begins to rise (12.5% LEL). Notice this remains below the critical warning limit of 20% LEL (no baseline alarm triggers).
+   - At **T+10 mins**, combustible gas begins to rise (12.5% LEL). Step 2 (Detect) of the Decision Cycle stepper lights up.
    - At **T+30 mins**, the extractor fan efficiency drops to 62%, and a ventilation warning is generated.
    - At **T+40 mins**, a Hot Work (welding) permit is authorized and becomes active in the Coke Oven sector.
    - At **T+50 mins**, workers enter the battery.
-   - At **T+60 mins**, the hybrid model detects a **HIGH** risk (risk index spikes, zone turns Orange).
+   - At **T+60 mins**, the hybrid model detects a **HIGH** risk (risk index spikes, zone turns Orange). The stepper advances to highlight Step 3 (Reason) and Step 4 (Recommend).
    - At **T+80 mins**, gas exceeds warning levels (24.5% LEL). The model triggers a **CRITICAL** risk (zone turns Red). Note that the single-sensor baseline alarm has still not fired (as it requires gas to hit 40% LEL).
 5. **Investigate**: Click **Risk Intelligence** -> **Investigate** on the active Coke Oven Battery risk. 
-6. **Ground Evidence**: In the Investigation panel, review the contributing factors weights bar-chart and inspect the RAG-grounded safety references (SOP sections regarding SIMOPS constraints).
+6. **Ground Evidence**: In the Investigation panel, review the **AI Safety Officer Active Audit Dossier Card** (Officer ID `SO-992-AGY`). Read the generated Safety Officer Assessment (Observed Conditions and Reasoning & Risk Justification logs), audit the **SOP & Regulatory Compliance Audit** checklist (violations are highlighted in red), and view the **Historical Precedent Cases** matched by the model.
 7. **Consult Copilot**: Click **Safety Copilot** and click the suggested question: *"Why is this zone critical and what should we do first?"* Read the grounded advice.
 8. **Execute Intervention**: Return to the Investigation panel and click **Execute Intervention**.
 9. **Mitigation**: Observe the evacuation logs update, the hot work permit get suspended, and the risk index safely decrease: `88 -> 72 -> 55 -> 38 -> 24`.
