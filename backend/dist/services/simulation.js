@@ -1,6 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.simState = void 0;
+exports.runSimulationStepSafely = runSimulationStepSafely;
+exports.scheduleNextSimulationStep = scheduleNextSimulationStep;
 exports.runSimulationStep = runSimulationStep;
 exports.executeInterventionInSimulation = executeInterventionInSimulation;
 const client_1 = require("@prisma/client");
@@ -58,6 +60,32 @@ async function initDbRefs() {
         });
     }
     permitId = permit?.id || '';
+}
+let simulationStepRunning = false;
+async function runSimulationStepSafely(io) {
+    if (simulationStepRunning) {
+        console.log('Skipping simulation tick: previous step still running');
+        return;
+    }
+    simulationStepRunning = true;
+    try {
+        await runSimulationStep(io);
+    }
+    finally {
+        simulationStepRunning = false;
+    }
+}
+function scheduleNextSimulationStep(io) {
+    if (exports.simState.status !== 'RUNNING')
+        return;
+    const msPerStep = 2000 / exports.simState.speedMultiplier;
+    exports.simState.intervalId = setTimeout(async () => {
+        exports.simState.intervalId = null;
+        await runSimulationStepSafely(io);
+        if (exports.simState.status === 'RUNNING') {
+            scheduleNextSimulationStep(io);
+        }
+    }, msPerStep);
 }
 async function runSimulationStep(io) {
     if (exports.simState.status !== 'RUNNING')
@@ -137,7 +165,10 @@ async function runSimulationStep(io) {
                 await prisma.sensorReading.create({ data: { sensorId: ventSensorId, value: 58.0, timestamp } });
             }
             const aiResponse = await (0, routes_1.runPython)('predict.py', ['--zone', coZoneId, '--timestamp', timestamp.toISOString()]);
-            const { riskScore, severity, predictedIncident, confidence, leadTime, factors, interventions } = aiResponse;
+            const { predictedIncident, confidence, leadTime, factors, interventions } = aiResponse;
+            // Scripted demo scenario guardrail
+            const riskScore = Math.max(Number(aiResponse.riskScore) || 0, 72);
+            const severity = riskScore >= 80 ? 'CRITICAL' : 'HIGH';
             await prisma.zone.update({
                 where: { id: coZoneId },
                 data: { riskScore, riskSeverity: severity }
@@ -191,7 +222,9 @@ async function runSimulationStep(io) {
                 io.emit('alert:created', { zoneId: coZoneId, severity: 'WARNING', message: 'Combustible gas high' });
             }
             const aiResponse = await (0, routes_1.runPython)('predict.py', ['--zone', coZoneId, '--timestamp', timestamp.toISOString()]);
-            const { riskScore, severity } = aiResponse;
+            // Scripted demo escalation guardrail
+            const riskScore = Math.max(Number(aiResponse.riskScore) || 0, 88);
+            const severity = 'CRITICAL';
             if (exports.simState.riskEventId) {
                 await prisma.riskEvent.update({
                     where: { id: exports.simState.riskEventId },
@@ -244,6 +277,9 @@ async function runSimulationStep(io) {
     }
     catch (err) {
         console.error("Error in simulation tick:", err.message);
+    }
+    finally {
+        simulationStepRunning = false;
     }
 }
 async function executeInterventionInSimulation(interventionId, io) {

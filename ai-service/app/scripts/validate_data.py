@@ -118,63 +118,39 @@ def validate_and_split():
         val = str(row["is_incident_imminent"])
         class_dist[val] = class_dist.get(val, 0) + 1
 
-    # 4. Temporal Split without Leakage
-    # Sort chronologically by timestamp
+    # 4. Scenario-group split: a scenario never crosses train/validation/test.
     df_windows = sorted(df_windows, key=lambda x: x["timestamp"])
-    total_rows = len(df_windows)
-    # Split by unique timestamps so identical timestamps never cross split boundaries.
-    unique_timestamps = sorted(set(row["timestamp"] for row in df_windows))
-    train_ts_idx = int(len(unique_timestamps) * 0.70)
-    val_ts_idx = int(len(unique_timestamps) * 0.85)
+    scenario_ids = sorted(set(row["scenario_id"] for row in df_windows),
+                          key=lambda sid: min(r["timestamp"] for r in df_windows if r["scenario_id"] == sid))
+    train_idx = int(len(scenario_ids) * 0.70)
+    val_idx = int(len(scenario_ids) * 0.85)
+    train_ids, val_ids, test_ids = set(scenario_ids[:train_idx]), set(scenario_ids[train_idx:val_idx]), set(scenario_ids[val_idx:])
+    df_train = [r for r in df_windows if r["scenario_id"] in train_ids]
+    df_val = [r for r in df_windows if r["scenario_id"] in val_ids]
+    df_test = [r for r in df_windows if r["scenario_id"] in test_ids]
 
-    train_timestamps_set = set(unique_timestamps[:train_ts_idx])
-    val_timestamps_set = set(unique_timestamps[train_ts_idx:val_ts_idx])
-    test_timestamps_set = set(unique_timestamps[val_ts_idx:])
-
-    df_train = [row for row in df_windows if row["timestamp"] in train_timestamps_set]
-    df_val = [row for row in df_windows if row["timestamp"] in val_timestamps_set]
-    df_test = [row for row in df_windows if row["timestamp"] in test_timestamps_set]
-
-    # Write splits
     fieldnames = list(df_windows[0].keys())
-    
     def write_csv_rows(filename, rows_to_write):
         with open(os.path.join(splits_dir, filename), "w", newline="", encoding="utf-8") as f_obj:
             writer = csv.DictWriter(f_obj, fieldnames=fieldnames)
-            writer.writeheader()
-            writer.writerows(rows_to_write)
-
+            writer.writeheader(); writer.writerows(rows_to_write)
     write_csv_rows("compound_risk_train.csv", df_train)
     write_csv_rows("compound_risk_validation.csv", df_val)
     write_csv_rows("compound_risk_test.csv", df_test)
 
     # 5. Leakage Audit
-    train_timestamps = [row["timestamp"] for row in df_train]
-    val_timestamps = [row["timestamp"] for row in df_val]
-    test_timestamps = [row["timestamp"] for row in df_test]
-
-    train_max = max(train_timestamps) if train_timestamps else ""
-    val_min = min(val_timestamps) if val_timestamps else ""
-    val_max = max(val_timestamps) if val_timestamps else ""
-    test_min = min(test_timestamps) if test_timestamps else ""
-
-    leakage_status = "CLEAN"
     leakage_details = []
-    if train_max and val_min and train_max >= val_min:
-        leakage_status = "LEAKAGE_DETECTED"
-        leakage_details.append(f"Train max timestamp ({train_max}) overlaps or is after Validation min timestamp ({val_min})")
-    if val_max and test_min and val_max >= test_min:
-        leakage_status = "LEAKAGE_DETECTED"
-        leakage_details.append(f"Validation max timestamp ({val_max}) overlaps or is after Test min timestamp ({test_min})")
-
+    if train_ids & val_ids: leakage_details.append("Scenario overlap between train and validation")
+    if train_ids & test_ids: leakage_details.append("Scenario overlap between train and test")
+    if val_ids & test_ids: leakage_details.append("Scenario overlap between validation and test")
+    leakage_status = "CLEAN" if not leakage_details else "LEAKAGE_DETECTED"
     leakage_report = {
         "status": leakage_status,
-        "train_range": [min(train_timestamps), train_max],
-        "val_range": [val_min, val_max],
-        "test_range": [test_min, max(test_timestamps)],
+        "split_strategy": "scenario_group_chronological",
+        "train_scenarios": len(train_ids), "validation_scenarios": len(val_ids), "test_scenarios": len(test_ids),
+        "scenario_overlap": {"train_val": len(train_ids & val_ids), "train_test": len(train_ids & test_ids), "val_test": len(val_ids & test_ids)},
         "details": leakage_details
     }
-
     with open(os.path.join(metadata_dir, "leakage_audit.json"), "w") as f:
         json.dump(leakage_report, f, indent=2)
 

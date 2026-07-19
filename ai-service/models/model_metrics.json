@@ -1,6 +1,35 @@
 {
-  "train_accuracy": 0.9929521276595744,
-  "val_accuracy": 0.9929521276595744,
-  "trained_at": "2026-07-11T12:17:51.045823",
+  "train": {
+    "tp": 78,
+    "tn": 6961,
+    "fp": 99,
+    "fn": 6,
+    "accuracy": 0.9853023516237402,
+    "precision": 0.4406779661016949,
+    "recall": 0.9285714285714286,
+    "specificity": 0.9859773371104816,
+    "f1": 0.5977011494252874
+  },
+  "validation": {
+    "tp": 9,
+    "tn": 1692,
+    "fp": 10,
+    "fn": 3,
+    "accuracy": 0.9924154025670945,
+    "precision": 0.47368421052631576,
+    "recall": 0.75,
+    "specificity": 0.9941245593419507,
+    "f1": 0.5806451612903226
+  },
+  "decision_threshold": 0.8,
+  "train_class_distribution": {
+    "positive": 84,
+    "negative": 7060
+  },
+  "validation_class_distribution": {
+    "positive": 12,
+    "negative": 1702
+  },
+  "trained_at": "2026-07-11T20:07:29.833843",
   "num_features": 40
 }

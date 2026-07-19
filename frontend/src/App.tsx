@@ -121,18 +121,39 @@ export default function App() {
   const socketRef = useRef<Socket | null>(null);
 
   // Axios Authorization header setup
-  useEffect(() => {
-    if (token) {
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      fetchInitialData();
-      initSocket();
-    } else {
-      delete axios.defaults.headers.common['Authorization'];
-      if (socketRef.current) {
-        socketRef.current.disconnect();
-      }
+ useEffect(() => {
+  if (token) {
+    axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+
+    fetchInitialData();
+
+    // Prevent an old socket connection from surviving.
+    if (socketRef.current) {
+      socketRef.current.removeAllListeners();
+      socketRef.current.disconnect();
+      socketRef.current = null;
     }
-  }, [token]);
+
+    initSocket();
+  } else {
+    delete axios.defaults.headers.common['Authorization'];
+
+    if (socketRef.current) {
+      socketRef.current.removeAllListeners();
+      socketRef.current.disconnect();
+      socketRef.current = null;
+    }
+  }
+
+  // IMPORTANT: cleanup for React StrictMode / component unmount.
+  return () => {
+    if (socketRef.current) {
+      socketRef.current.removeAllListeners();
+      socketRef.current.disconnect();
+      socketRef.current = null;
+    }
+  };
+}, [token]);
 
   const initSocket = () => {
     socketRef.current = io('http://localhost:5000');
@@ -199,6 +220,15 @@ export default function App() {
       addTimelineEvent('SIMULATION_STEP', `Simulation advanced to step T+${data.step} mins`);
     });
 
+    socketRef.current.on('dashboard:update', () => {
+  fetchSummary();
+  fetchZones();
+  fetchActiveRisks();
+  fetchPermits();
+  fetchWorkers();
+  fetchEquipment();
+});
+
     socketRef.current.on('intervention:started', () => {
       setInterventionProgress(5);
     });
@@ -260,6 +290,12 @@ export default function App() {
     try {
       const res = await axios.get('/api/risks');
       setActiveRisks(res.data);
+      // Synchronize investigatingRisk with latest database record
+      setInvestigatingRisk((prev: any) => {
+        if (!prev) return null;
+        const updated = res.data.find((r: any) => r.id === prev.id);
+        return updated ? updated : prev;
+      });
     } catch (err) {}
   };
 
@@ -684,6 +720,86 @@ export default function App() {
                 })}
               </div>
 
+              {/* AI Safety Officer Monitoring Hub */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Reasoning Flow / Lifecycle */}
+                <div className="lg:col-span-2 rounded-xl border border-slate-800 bg-slate-900 p-6 flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-sm font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+                        <Activity className="h-4 w-4 text-sky-400" /> AI Safety Officer Decision Cycle
+                      </h3>
+                      <span className={`px-2.5 py-0.5 rounded text-[10px] font-bold border ${
+                        summary.activeCriticalRisks > 0 
+                          ? 'bg-red-500/20 text-red-400 border-red-500/30 animate-pulse'
+                          : 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
+                      }`}>
+                        {summary.activeCriticalRisks > 0 ? "ACTIVE INCIDENT THREAT DETECTED" : "SYSTEM STATUS: SECURE MONITORING"}
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-400 mt-1.5 font-medium">Continuous automated reasoning sequence observing, detecting, and mitigating plant hazards.</p>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mt-6 relative">
+                    {[
+                      { step: 1, label: "Observe", desc: "Telemetry ingestion", active: true, highlighted: true },
+                      { step: 2, label: "Detect", desc: "Anomaly correlation", active: true, highlighted: summary.activeCriticalRisks > 0 || simStatus !== 'IDLE' },
+                      { step: 3, label: "Reason", desc: "SOP & precedent audit", active: summary.activeCriticalRisks > 0, highlighted: summary.activeCriticalRisks > 0 },
+                      { step: 4, label: "Recommend", desc: "Safety dispatches", active: summary.activeCriticalRisks > 0, highlighted: summary.activeCriticalRisks > 0 },
+                      { step: 5, label: "Mitigate", desc: "Override & reduction", active: summary.activeCriticalRisks > 0, highlighted: false }
+                    ].map((s, idx) => {
+                      const isHighlighted = s.highlighted;
+                      return (
+                        <div key={idx} className={`p-3.5 rounded-lg border transition ${
+                          isHighlighted
+                            ? 'border-sky-500/40 bg-sky-500/5 text-white'
+                            : 'border-slate-800 bg-slate-950/40 text-slate-500'
+                        }`}>
+                          <div className="flex items-center gap-2">
+                            <span className={`flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold ${
+                              isHighlighted ? 'bg-sky-500 text-slate-950' : 'bg-slate-850/80 text-slate-400'
+                            }`}>{s.step}</span>
+                            <span className="font-bold text-xs uppercase tracking-wider">{s.label}</span>
+                          </div>
+                          <p className="text-[10px] text-slate-400 mt-2 leading-relaxed">{s.desc}</p>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Fused Data Ingestion Channels */}
+                <div className="rounded-xl border border-slate-800 bg-slate-900 p-6 flex flex-col justify-between">
+                  <div>
+                    <h3 className="text-sm font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2 mb-1">
+                      <Database className="h-4 w-4 text-sky-400" /> Fused Ingestion Channels
+                    </h3>
+                    <p className="text-[10px] text-slate-500 font-medium">Real-time data feeds processed by the safety agent.</p>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 mt-4">
+                    {[
+                      { name: "IoT Sensors", status: "Active", active: true },
+                      { name: "SCADA Feeds", status: "Active", active: true },
+                      { name: "Permit-to-Work", status: "Active", active: true },
+                      { name: "Worker Exposure", status: "Active", active: true },
+                      { name: "Asset Health", status: "Active", active: true },
+                      { name: "Maintenance", status: "Active", active: true },
+                      { name: "Past Incidents", status: "Active", active: true },
+                      { name: "Regulatory RAG", status: "Active", active: true },
+                      { name: "Vision (CCTV)", status: "Coming Soon", active: false }
+                    ].map((src, idx) => (
+                      <div key={idx} className="p-2 rounded bg-slate-950/60 border border-slate-850 flex flex-col justify-between h-11">
+                        <div className="flex items-center gap-1 justify-between">
+                          <span className="text-[10px] font-bold text-slate-300 truncate" title={src.name}>{src.name}</span>
+                          <span className={`inline-block h-1.5 w-1.5 rounded-full shrink-0 ${src.active ? 'bg-emerald-400' : 'bg-amber-400'}`} />
+                        </div>
+                        <span className="text-[8px] font-mono text-slate-500 uppercase tracking-wider mt-0.5">{src.status}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
               {/* Layout Content */}
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 
@@ -988,84 +1104,225 @@ export default function App() {
                 </div>
               </div>
 
+              {/* AI Safety Officer Summary Alert Banner */}
+              {investigatingRisk.incidentSummary && (
+                <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-5 flex items-start gap-4 animate-pulse">
+                  <ShieldAlert className="h-6 w-6 text-red-400 shrink-0 mt-0.5" />
+                  <div>
+                    <h4 className="text-sm font-bold text-red-400 uppercase tracking-wider">AI Safety Officer Decision Alert</h4>
+                    <p className="text-sm text-slate-200 mt-1 font-semibold leading-relaxed">{investigatingRisk.incidentSummary}</p>
+                  </div>
+                </div>
+              )}
+
               {/* Grid content */}
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 
-                {/* Contributing factors */}
-                <div className="rounded-xl border border-slate-800 bg-slate-900 p-6 space-y-4">
-                  <h3 className="text-sm font-bold uppercase tracking-wider text-slate-400">Model Contributing Factors</h3>
-                  <div className="space-y-3">
-                    {riskFactors.map((f, idx) => (
-                      <div key={idx} className="space-y-1">
-                        <div className="flex justify-between text-xs">
-                          <span className="text-slate-300 font-medium">{f.factorName}</span>
-                          <span className="text-slate-400">{Math.round(f.weight * 100)}%</span>
-                        </div>
-                        <div className="h-2 w-full rounded bg-slate-950 overflow-hidden">
-                          <div className="h-full bg-sky-500 rounded" style={{ width: `${f.weight * 100}%` }} />
-                        </div>
+                {/* Column 1 & 2: Safety Officer Structured Assessment Report */}
+                <div className="lg:col-span-2 space-y-6">
+                  
+                  {/* AI Safety Officer Active Dossier Card */}
+                  <div className="rounded-xl border border-slate-800 bg-slate-900 p-5 flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-sky-500/10 text-sky-400 border border-sky-500/20 shadow-inner">
+                        <Shield className="h-6 w-6" />
                       </div>
-                    ))}
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-extrabold text-sm text-white uppercase tracking-wider">AI Safety Officer Active Audit</h3>
+                          <span className="px-1.5 py-0.5 rounded bg-slate-800 font-mono text-[9px] text-slate-500 font-bold">SO-992-AGY</span>
+                        </div>
+                        <p className="text-xs text-slate-450 mt-1.5 font-medium">Cross-referencing 8 real-time ingestion streams against safety standard indices.</p>
+                      </div>
+                    </div>
+                    <div className="text-right font-mono text-[10px] text-slate-500 space-y-0.5 hidden md:block">
+                      <p>Engine: <span className="text-slate-300">Hybrid Classifier v1.0.0</span></p>
+                      <p>Regulatory index: <span className="text-slate-300">RAG (TF-IDF)</span></p>
+                    </div>
                   </div>
+
+                  {/* Narrative Observations & Explanation */}
+                  <div className="rounded-xl border border-slate-800 bg-slate-900 p-6 space-y-4">
+                    <h3 className="text-sm font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+                      <Shield className="h-4 w-4 text-sky-400" /> Safety Officer Assessment
+                    </h3>
+                    
+                    <div className="space-y-4">
+                      <div>
+                        <span className="text-[10px] font-mono text-slate-500 uppercase block tracking-wider">Observed Conditions</span>
+                        <p className="text-xs text-slate-300 mt-1 leading-relaxed whitespace-pre-line bg-slate-950/60 p-3 rounded border border-slate-850">
+                          {investigatingRisk.observations || "Gathering real-time observations..."}
+                        </p>
+                      </div>
+                      
+                      <div>
+                        <span className="text-[10px] font-mono text-slate-500 uppercase block tracking-wider">Reasoning & Risk Justification</span>
+                        <p className="text-xs text-slate-300 mt-1 leading-relaxed whitespace-pre-line bg-slate-950/60 p-3 rounded border border-slate-850">
+                          {investigatingRisk.reasoning || "Compiling logical reasoning trails..."}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* SOP & Regulatory Compliance Check */}
+                  <div className="rounded-xl border border-slate-800 bg-slate-900 p-6 space-y-4">
+                    <h3 className="text-sm font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+                      <FileText className="h-4 w-4 text-sky-400" /> SOP & Regulatory Audit
+                    </h3>
+                    
+                    <div className="space-y-3">
+                      {investigatingRisk.regulatoryRefsJson ? (
+                        (() => {
+                          try {
+                            const refs = JSON.parse(investigatingRisk.regulatoryRefsJson);
+                            if (refs.length === 0) return <p className="text-xs text-slate-500">No regulatory checks generated.</p>;
+                            return refs.map((ref: any, idx: number) => {
+                              let borderClass = "border-slate-800 bg-slate-950/40";
+                              let textClass = "text-slate-400";
+                              let statusIcon = <FileText className="h-4 w-4 text-slate-400" />;
+                              
+                              if (ref.status === "VIOLATION") {
+                                borderClass = "border-red-500/25 bg-red-500/5";
+                                textClass = "text-red-400 font-bold";
+                                statusIcon = <ShieldAlert className="h-4 w-4 text-red-400" />;
+                              } else if (ref.status === "COMPLIANT") {
+                                borderClass = "border-emerald-500/20 bg-emerald-500/5";
+                                textClass = "text-emerald-400 font-bold";
+                                statusIcon = <ShieldCheck className="h-4 w-4 text-emerald-400" />;
+                              } else if (ref.status === "REFERENCE") {
+                                borderClass = "border-sky-500/20 bg-sky-500/5";
+                                textClass = "text-sky-400 font-medium";
+                              }
+
+                              return (
+                                <div key={idx} className={`p-3 rounded-lg border flex items-start gap-3 ${borderClass}`}>
+                                  <div className="mt-0.5">{statusIcon}</div>
+                                  <div className="space-y-1">
+                                    <div className="flex items-center gap-2 text-xs">
+                                      <span className="font-bold text-white">{ref.doc_id}</span>
+                                      <span className="text-slate-500">•</span>
+                                      <span className="text-slate-450">{ref.section}</span>
+                                      <span className="text-slate-500">•</span>
+                                      <span className={`px-1.5 py-0.2 rounded text-[9px] uppercase ${
+                                        ref.status === 'VIOLATION' ? 'bg-red-500/10 text-red-400' :
+                                        ref.status === 'COMPLIANT' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-sky-500/10 text-sky-400'
+                                      }`}>{ref.status}</span>
+                                    </div>
+                                    <p className="text-xs text-slate-300 leading-relaxed font-mono">{ref.clause}</p>
+                                  </div>
+                                </div>
+                              );
+                            });
+                          } catch (e) {
+                            return <p className="text-xs text-red-400">Failed to parse regulatory data.</p>;
+                          }
+                        })()
+                      ) : (
+                        <p className="text-xs text-slate-500">Querying RAG safety standards for this zone...</p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Historical Precedent Incident Library */}
+                  <div className="rounded-xl border border-slate-800 bg-slate-900 p-6 space-y-4">
+                    <h3 className="text-sm font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+                      <History className="h-4 w-4 text-sky-400" /> Historical Incidents & Precedents
+                    </h3>
+                    
+                    <div className="space-y-3">
+                      {investigatingRisk.similarIncidentsJson ? (
+                        (() => {
+                          try {
+                            const incidents = JSON.parse(investigatingRisk.similarIncidentsJson);
+                            if (incidents.length === 0) return <p className="text-xs text-slate-500">No matching historical incident patterns found for this hazard signature.</p>;
+                            return incidents.map((inc: any, idx: number) => (
+                              <div key={idx} className="p-3.5 rounded-lg bg-slate-950 border border-slate-850 flex items-start gap-3">
+                                <History className="h-5 w-5 text-amber-500 shrink-0 mt-0.5" />
+                                <div>
+                                  <div className="flex items-center gap-2 text-xs">
+                                    <span className="font-bold text-white">{inc.title}</span>
+                                    <span className="text-slate-500">•</span>
+                                    <span className="text-slate-400 font-mono">{inc.date}</span>
+                                  </div>
+                                  <p className="text-xs text-slate-400 mt-1.5 leading-relaxed">{inc.cause}</p>
+                                </div>
+                              </div>
+                            ));
+                          } catch (e) {
+                            return <p className="text-xs text-red-400">Failed to parse historical incident logs.</p>;
+                          }
+                        })()
+                      ) : (
+                        <p className="text-xs text-slate-500">Checking historical database for matching near-miss logs...</p>
+                      )}
+                    </div>
+                  </div>
+
                 </div>
 
-                {/* Evidence references */}
-                <div className="rounded-xl border border-slate-800 bg-slate-900 p-6 space-y-4">
-                  <h3 className="text-sm font-bold uppercase tracking-wider text-slate-400">RAG Safety Evidence</h3>
-                  <div className="space-y-3 max-h-[300px] overflow-y-auto">
-                    {riskEvidence.map((e, idx) => (
-                      <div key={idx} className="p-3 rounded-lg bg-slate-950 border border-slate-800 flex items-start gap-3">
-                        <FileText className="h-5 w-5 text-sky-400 shrink-0 mt-0.5" />
-                        <div>
-                          <span className="px-1.5 py-0.5 rounded bg-slate-800 text-[9px] text-slate-400 font-bold uppercase">{e.type}</span>
-                          <p className="text-xs text-slate-300 mt-1">{e.content}</p>
-                          {e.reference && <span className="text-[10px] text-slate-500 mt-1 block">Ref: {e.reference}</span>}
+                {/* Column 3: ML Factors, Actions & Dispatch Panel */}
+                <div className="space-y-6">
+                  
+                  {/* Contributing factors */}
+                  <div className="rounded-xl border border-slate-800 bg-slate-900 p-6 space-y-4">
+                    <h3 className="text-sm font-bold uppercase tracking-wider text-slate-400">Model Contributing Factors</h3>
+                    <div className="space-y-3">
+                      {riskFactors.map((f, idx) => (
+                        <div key={idx} className="space-y-1">
+                          <div className="flex justify-between text-xs">
+                            <span className="text-slate-300 font-medium">{f.factorName}</span>
+                            <span className="text-slate-400">{Math.round(f.weight * 100)}%</span>
+                          </div>
+                          <div className="h-2 w-full rounded bg-slate-950 overflow-hidden">
+                            <div className="h-full bg-sky-500 rounded" style={{ width: `${f.weight * 100}%` }} />
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
-                </div>
 
-                {/* Recommended action list */}
-                <div className="rounded-xl border border-slate-800 bg-slate-900 p-6 flex flex-col justify-between">
-                  <div>
-                    <h3 className="text-sm font-bold uppercase tracking-wider text-slate-400 mb-4">AI Recommended Intervention</h3>
-                    {activeIntervention ? (
-                      <div className="space-y-4">
-                        <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-800">
-                          <h4 className="font-bold text-white text-sm">{activeIntervention.title}</h4>
-                          <p className="text-xs text-slate-400 mt-1.5 leading-relaxed">{activeIntervention.description}</p>
-                          <div className="mt-3 flex justify-between text-xs text-sky-400">
-                            <span>Estimated reduction:</span>
-                            <span className="font-bold">-{activeIntervention.estimatedReduction}%</span>
+                  {/* Recommended Action list */}
+                  <div className="rounded-xl border border-slate-800 bg-slate-900 p-6 flex flex-col justify-between min-h-[300px]">
+                    <div>
+                      <h3 className="text-sm font-bold uppercase tracking-wider text-slate-400 mb-4">AI Recommended Intervention</h3>
+                      {activeIntervention ? (
+                        <div className="space-y-4">
+                          <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-800">
+                            <h4 className="font-bold text-white text-sm">{activeIntervention.title}</h4>
+                            <p className="text-xs text-slate-400 mt-1.5 leading-relaxed">{activeIntervention.description}</p>
+                            <div className="mt-3 flex justify-between text-xs text-sky-400">
+                              <span>Estimated reduction:</span>
+                              <span className="font-bold">-{activeIntervention.estimatedReduction}%</span>
+                            </div>
                           </div>
+
+                          {interventionProgress > 0 && (
+                            <div className="space-y-1">
+                              <div className="flex justify-between text-xs text-slate-400">
+                                <span>Executing steps...</span>
+                                <span>{interventionProgress}%</span>
+                              </div>
+                              <div className="h-1.5 w-full bg-slate-950 rounded overflow-hidden">
+                                <div className="h-full bg-emerald-500 transition-all duration-300" style={{ width: `${interventionProgress}%` }} />
+                              </div>
+                            </div>
+                          )}
                         </div>
+                      ) : (
+                        <p className="text-xs text-slate-500">No active recommendations generated.</p>
+                      )}
+                    </div>
 
-                        {interventionProgress > 0 && (
-                          <div className="space-y-1">
-                            <div className="flex justify-between text-xs text-slate-400">
-                              <span>Executing steps...</span>
-                              <span>{interventionProgress}%</span>
-                            </div>
-                            <div className="h-1.5 w-full bg-slate-950 rounded overflow-hidden">
-                              <div className="h-full bg-emerald-500 transition-all duration-300" style={{ width: `${interventionProgress}%` }} />
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    ) : (
-                      <p className="text-xs text-slate-500">No active recommendations generated.</p>
+                    {activeIntervention && activeIntervention.status === 'RECOMMENDED' && (
+                      <button
+                        onClick={() => triggerIntervention(activeIntervention.id)}
+                        className="w-full mt-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-sm font-bold transition flex items-center justify-center gap-2"
+                      >
+                        <CheckSquare className="h-4 w-4" /> Execute Intervention
+                      </button>
                     )}
                   </div>
 
-                  {activeIntervention && activeIntervention.status === 'RECOMMENDED' && (
-                    <button
-                      onClick={() => triggerIntervention(activeIntervention.id)}
-                      className="w-full mt-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-sm font-bold transition flex items-center justify-center gap-2"
-                    >
-                      <CheckSquare className="h-4 w-4" /> Execute Intervention
-                    </button>
-                  )}
                 </div>
 
               </div>

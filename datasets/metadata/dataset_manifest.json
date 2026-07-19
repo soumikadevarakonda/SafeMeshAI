@@ -1,6 +1,6 @@
 {
   "project": "SafeMesh AI",
-  "generated_at": "2026-07-11T12:31:51.766849",
+  "generated_at": "2026-07-11T20:14:31.138986",
   "files": {
     "zones.csv": {
       "row_count": 10,
@@ -40,7 +40,7 @@
       ]
     },
     "sensor_readings.csv": {
-      "row_count": 122125,
+      "row_count": 124068,
       "columns": [
         "timestamp",
         "sensor_id",
@@ -127,9 +127,11 @@
       ]
     },
     "compound_risk_windows.csv": {
-      "row_count": 10744,
+      "row_count": 10419,
       "columns": [
         "timestamp",
+        "scenario_id",
+        "scenario_type",
         "zone_id",
         "sensor_anomaly_score",
         "active_permits",
@@ -146,6 +148,9 @@
         "shift_change",
         "risk_score",
         "is_incident_imminent",
+        "incident_event_time",
+        "minutes_to_incident",
+        "event_occurred",
         "combustible_gas_val",
         "combustible_gas_avg_30m",
         "combustible_gas_std_30m",

@@ -9,6 +9,7 @@ from datetime import datetime
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from app.features import extract_features_from_state
 from app.models import SafetyModels
+from app.safety_officer import AISafetyOfficer
 
 def main():
     parser = argparse.ArgumentParser()
@@ -25,7 +26,10 @@ def main():
     conn.row_factory = sqlite3.Row
 
     # Fetch states
-    cursor = conn.execute("SELECT * FROM Sensor WHERE zoneId = ? OR zone_id = ?", (args.zone, args.zone))
+    cursor = conn.execute(
+    "SELECT * FROM Sensor WHERE zoneId = ?",
+    (args.zone,)
+)
     db_sensors = [dict(row) for row in cursor.fetchall()]
 
     sensor_ids = [s["id"] for s in db_sensors]
@@ -45,7 +49,10 @@ def main():
     cursor = conn.execute("SELECT * FROM Worker")
     db_workers = [dict(row) for row in cursor.fetchall()]
 
-    cursor = conn.execute("SELECT * FROM Equipment WHERE zoneId = ? OR zone_id = ?", (args.zone, args.zone))
+    cursor = conn.execute(
+    "SELECT * FROM Equipment WHERE zoneId = ?",
+    (args.zone,)
+)
     db_equip = [dict(row) for row in cursor.fetchall()]
     
     db_maintenance = []
@@ -60,7 +67,10 @@ def main():
             "health_score": eq["healthScore"]
         })
 
-    cursor = conn.execute("SELECT * FROM NearMiss WHERE zoneId = ? OR zone_id = ?", (args.zone, args.zone))
+    cursor = conn.execute(
+    "SELECT * FROM NearMiss WHERE zoneId = ?",
+    (args.zone,)
+)
     db_near_misses = [dict(row) for row in cursor.fetchall()]
     conn.close()
 
@@ -185,7 +195,11 @@ def main():
         "features": features
     }
 
-    print(json.dumps(output))
+    # Run AI Safety Officer Decision Layer
+    officer = AISafetyOfficer(models_dir)
+    enriched_output = officer.observe_and_decide(args.zone, features, output)
+
+    print(json.dumps(enriched_output))
 
 if __name__ == "__main__":
     main()

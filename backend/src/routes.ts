@@ -6,7 +6,7 @@ import { exec } from 'child_process';
 import path from 'path';
 import fs from 'fs';
 import { Server } from 'socket.io';
-import { simState, runSimulationStep, executeInterventionInSimulation } from './services/simulation';
+import { simState, scheduleNextSimulationStep, executeInterventionInSimulation } from './services/simulation';
 
 const prisma = new PrismaClient();
 const router = Router();
@@ -92,6 +92,11 @@ function authorizeRoles(...roles: string[]) {
 // ----------------------------------------------------
 export default function setupRouter(io: Server) {
   
+  // Sync simulation status on socket connection
+  io.on('connection', (socket) => {
+    socket.emit('simulation:status', { status: simState.status, step: simState.step });
+  });
+  
   // ----------------------------------------------------
   // AUTH
   // ----------------------------------------------------
@@ -132,7 +137,18 @@ export default function setupRouter(io: Server) {
       const activeRisksCount = await prisma.riskEvent.count({ where: { status: 'ACTIVE', severity: { in: ['HIGH', 'CRITICAL'] } } });
       const criticalZonesCount = await prisma.zone.count({ where: { riskSeverity: 'CRITICAL' } });
       const activePermits = await prisma.permit.count({ where: { status: 'ACTIVE' } });
-      const workersExposed = await prisma.worker.count({ where: { status: 'HAZARD_EXPOSURE' } });
+      const workersExposed = await prisma.worker.count({
+  where: {
+    currentZone: {
+      riskSeverity: {
+        in: ['HIGH', 'CRITICAL']
+      }
+    },
+    status: {
+      in: ['ON_DUTY', 'HAZARD_EXPOSURE']
+    }
+  }
+});
       const warningLeadTimes = await prisma.riskEvent.findMany({ select: { leadTime: true } });
       
       const avgLeadTime = warningLeadTimes.length 
@@ -331,10 +347,21 @@ export default function setupRouter(io: Server) {
   });
 
   router.get('/risks/:riskId/similar-incidents', authenticateToken, async (req, res) => {
-    res.json([
-      { title: "Coke Oven Gas Flash Fire (2024)", severity: "MAJOR", date: "2024-04-12", cause: "Welding spark ignited pocket of CO gas. Exhaust fan extraction was degraded." },
-      { title: "Ventilation Degraded Exhaust Shut-Off (2025)", severity: "MINOR", date: "2025-09-02", cause: "Ventilation efficiency dropped to 48%, causing gas pockets." }
-    ]);
+    try {
+      const risk = await prisma.riskEvent.findUnique({
+        where: { id: req.params.riskId }
+      });
+      if (risk && risk.similarIncidentsJson) {
+        return res.json(JSON.parse(risk.similarIncidentsJson));
+      }
+      // Fallback to default mock incidents if no safety officer data is written yet
+      res.json([
+        { title: "Coke Oven Gas Flash Fire (2024)", severity: "MAJOR", date: "2024-04-12", cause: "Welding spark ignited pocket of CO gas. Exhaust fan extraction was degraded." },
+        { title: "Ventilation Degraded Exhaust Shut-Off (2025)", severity: "MINOR", date: "2025-09-02", cause: "Ventilation efficiency dropped to 48%, causing gas pockets." }
+      ]);
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
   });
 
   // ----------------------------------------------------
@@ -359,7 +386,7 @@ export default function setupRouter(io: Server) {
   router.post('/interventions/:interventionId/execute', authenticateToken, authorizeRoles('SAFETY_OFFICER', 'CONTROL_ROOM_OPERATOR', 'ADMIN'), async (req, res) => {
     const { interventionId } = req.params;
     try {
-      executeInterventionInSimulation(interventionId, io);
+      await executeInterventionInSimulation(interventionId, io);
       res.json({ status: 'started', message: 'Intervention execution started' });
     } catch (e: any) {
       res.status(500).json({ error: e.message });
@@ -401,6 +428,7 @@ export default function setupRouter(io: Server) {
     try {
       if (simState.intervalId) {
         clearInterval(simState.intervalId);
+        simState.intervalId = null;
       }
       
       simState.status = 'RUNNING';
@@ -419,10 +447,7 @@ export default function setupRouter(io: Server) {
         });
       }
 
-      const msPerStep = 2000 / simState.speedMultiplier;
-      simState.intervalId = setInterval(() => {
-        runSimulationStep(io);
-      }, msPerStep);
+scheduleNextSimulationStep(io);
 
       io.emit('simulation:status', { status: 'RUNNING', step: 0 });
       res.json({ status: 'started', simulationId: simState.runId });
@@ -441,15 +466,34 @@ export default function setupRouter(io: Server) {
     res.json({ status: 'paused' });
   });
 
-  router.post('/simulations/:simulationId/resume', authenticateToken, (req, res) => {
-    simState.status = 'RUNNING';
-    const msPerStep = 2000 / simState.speedMultiplier;
-    simState.intervalId = setInterval(() => {
-      runSimulationStep(io);
-    }, msPerStep);
-    io.emit('simulation:status', { status: 'RUNNING', step: simState.step });
-    res.json({ status: 'resumed' });
+router.post('/simulations/:simulationId/resume', authenticateToken, (req, res) => {
+  if (simState.intervalId) {
+    clearInterval(simState.intervalId);
+    simState.intervalId = null;
+  }
+
+  if (simState.status === 'COMPLETED') {
+    return res.status(400).json({
+      error: 'Completed simulation cannot be resumed. Start a new simulation.'
+    });
+  }
+
+  simState.status = 'RUNNING';
+
+if (simState.intervalId) {
+  clearTimeout(simState.intervalId);
+  simState.intervalId = null;
+}
+
+scheduleNextSimulationStep(io);
+
+  io.emit('simulation:status', {
+    status: 'RUNNING',
+    step: simState.step
   });
+
+  res.json({ status: 'resumed' });
+});
 
   router.post('/simulations/:simulationId/reset', authenticateToken, async (req, res) => {
     simState.status = 'IDLE';

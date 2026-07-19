@@ -132,30 +132,31 @@ def generate_all_data(seed=42):
 
     start_date = datetime.now() - timedelta(days=10)
     steps = 10 * 24 * 12 # 2,880 steps
+    prediction_horizon_steps = 12  # 60 minutes at 5-minute intervals
 
     # Define scheduled positive incident scenarios
     incidents_schedule = [
-        {"start": 100, "end": 180, "zone_id": "Z-1", "type": "combustible_ignition"}, # Train
-        {"start": 400, "end": 460, "zone_id": "Z-3", "type": "confined_space_asphyxia"}, # Train
-        {"start": 700, "end": 760, "zone_id": "Z-2", "type": "blast_furnace_rupture"}, # Train
-        {"start": 1000, "end": 1080, "zone_id": "Z-1", "type": "combustible_ignition"}, # Train (Demo Coke Oven)
-        {"start": 1300, "end": 1360, "zone_id": "Z-4", "type": "boiler_overheat"}, # Train
-        {"start": 1600, "end": 1660, "zone_id": "Z-6", "type": "compressor_vibration"}, # Train
-        {"start": 1900, "end": 1960, "zone_id": "Z-3", "type": "confined_space_asphyxia"}, # Val
-        {"start": 2200, "end": 2265, "zone_id": "Z-1", "type": "combustible_ignition"}, # Val
-        {"start": 2500, "end": 2560, "zone_id": "Z-2", "type": "blast_furnace_rupture"}, # Test
-        {"start": 2700, "end": 2760, "zone_id": "Z-6", "type": "compressor_vibration"}  # Test
+        {"scenario_id":"INC-001","start": 100, "end": 180, "zone_id": "Z-1", "type": "combustible_ignition"}, # Train
+        {"scenario_id":"SCN-400","start": 400, "end": 460, "zone_id": "Z-3", "type": "confined_space_asphyxia"}, # Train
+        {"scenario_id":"SCN-700","start": 700, "end": 760, "zone_id": "Z-2", "type": "blast_furnace_rupture"}, # Train
+        {"scenario_id":"SCN-1000","start": 1000, "end": 1080, "zone_id": "Z-1", "type": "combustible_ignition"}, # Train (Demo Coke Oven)
+        {"scenario_id":"SCN-1300","start": 1300, "end": 1360, "zone_id": "Z-4", "type": "boiler_overheat"}, # Train
+        {"scenario_id":"SCN-1600","start": 1600, "end": 1660, "zone_id": "Z-6", "type": "compressor_vibration"}, # Train
+        {"scenario_id":"SCN-1900","start": 1900, "end": 1960, "zone_id": "Z-3", "type": "confined_space_asphyxia"}, # Val
+        {"scenario_id":"SCN-2200","start": 2200, "end": 2265, "zone_id": "Z-1", "type": "combustible_ignition"}, # Val
+        {"scenario_id":"SCN-2500","start": 2500, "end": 2560, "zone_id": "Z-2", "type": "blast_furnace_rupture"}, # Test
+        {"scenario_id":"SCN-2700","start": 2700, "end": 2760, "zone_id": "Z-6", "type": "compressor_vibration"}  # Test
     ]
 
     # Define challenging negative cases
     negatives_schedule = [
-        {"start": 250, "end": 300, "zone_id": "Z-1", "type": "benign_gas_spike"},
-        {"start": 500, "end": 550, "zone_id": "Z-4", "type": "benign_temp_spike"},
-        {"start": 800, "end": 850, "zone_id": "Z-6", "type": "benign_vib_spike"},
-        {"start": 1400, "end": 1450, "zone_id": "Z-1", "type": "safe_permit_active"},
-        {"start": 1750, "end": 1800, "zone_id": "Z-3", "type": "safe_permit_active"},
-        {"start": 2350, "end": 2400, "zone_id": "Z-2", "type": "benign_vent_drop"},
-        {"start": 2600, "end": 2650, "zone_id": "Z-1", "type": "slow_gas_drift"}
+        {"scenario_id":"SCN-250","start": 250, "end": 300, "zone_id": "Z-1", "type": "benign_gas_spike"},
+        {"scenario_id":"SCN-500","start": 500, "end": 550, "zone_id": "Z-4", "type": "benign_temp_spike"},
+        {"scenario_id":"SCN-800","start": 800, "end": 850, "zone_id": "Z-6", "type": "benign_vib_spike"},
+        {"scenario_id":"SCN-1400","start": 1400, "end": 1450, "zone_id": "Z-1", "type": "safe_permit_active"},
+        {"scenario_id":"SCN-1750","start": 1750, "end": 1800, "zone_id": "Z-3", "type": "safe_permit_active"},
+        {"scenario_id":"SCN-2350","start": 2350, "end": 2400, "zone_id": "Z-2", "type": "benign_vent_drop"},
+        {"scenario_id":"SCN-2600","start": 2600, "end": 2650, "zone_id": "Z-1", "type": "slow_gas_drift"}
     ]
 
     # 5. Permits generation (2200+)
@@ -187,7 +188,7 @@ def generate_all_data(seed=42):
 
     # Force permits to match scheduled positive incidents
     for idx, inc in enumerate(incidents_schedule):
-        p_start_time = start_date + timedelta(minutes=inc["start"] * 5)
+        p_start_time = start_date + timedelta(minutes=(inc["start"] - prediction_horizon_steps) * 5)
         p_end_time = start_date + timedelta(minutes=inc["end"] * 5)
         p_type = "HOT_WORK" if inc["type"] in ["combustible_ignition", "blast_furnace_rupture"] else "CONFINED_SPACE"
         
@@ -364,7 +365,7 @@ def generate_all_data(seed=42):
         # Check active incident
         active_inc = None
         for inc in incidents_schedule:
-            if inc["start"] <= step <= inc["end"]:
+            if inc["start"] - prediction_horizon_steps <= step <= inc["end"]:
                 active_inc = inc
                 break
 
@@ -380,6 +381,8 @@ def generate_all_data(seed=42):
             
             # Scenario checks
             inc_here = active_inc and active_inc["zone_id"] == zone_id
+            preincident_here = bool(inc_here and step < active_inc["start"])
+            post_event_here = bool(inc_here and step >= active_inc["start"])
             neg_here = active_neg and active_neg["zone_id"] == zone_id
 
             zone_vals = {}
@@ -407,31 +410,48 @@ def generate_all_data(seed=42):
                     val = sensor_current_val[s_id] * random.uniform(0.99, 1.01)
                     val = max(s["min_value"], min(s["max_value"], val))
 
-                # Inject incident spikes
+                # Inject predictive buildup before the event and stronger dynamics after it.
                 if inc_here:
-                    prog = (step - active_inc["start"]) / (active_inc["end"] - active_inc["start"])
+                    if preincident_here:
+                        pre_progress = max(0.0, min(1.0, (step - (active_inc["start"] - prediction_horizon_steps) + 1) / prediction_horizon_steps))
+                        prog = 0.0
+                    else:
+                        prog = max(0.0, min(1.0, (step - active_inc["start"]) / max(1, active_inc["end"] - active_inc["start"])))
                     
                     if active_inc["type"] == "combustible_ignition":
-                        if s_type == "combustible_gas":
+                        if preincident_here and s_type == "combustible_gas": val = max(val, 2.0 + pre_progress * 12.0 + random.uniform(-2, 2))
+                        elif preincident_here and s_type == "ventilation": val = min(val, 95.0 - pre_progress * 18.0 + random.uniform(-2, 2))
+                        elif s_type == "combustible_gas":
                             val = max(val, prog * 32.0)
                         elif s_type == "ventilation":
                             val = min(val, 95.0 - prog * 50.0)
                             
                     elif active_inc["type"] == "confined_space_asphyxia":
-                        if s_type == "toxic_gas":
+                        if preincident_here and s_type == "toxic_gas": val = max(val, 3.0 + pre_progress * 25.0 + random.uniform(-3, 3))
+                        elif preincident_here and s_type == "oxygen": val = min(val, 20.9 - pre_progress * 1.1 + random.uniform(-0.1, 0.1))
+                        elif s_type == "toxic_gas":
                             val = max(val, prog * 85.0)
                         elif s_type == "oxygen":
                             val = min(val, 20.9 - prog * 3.4)
                             
                     elif active_inc["type"] == "blast_furnace_rupture":
-                        if s_type == "temperature":
+                        if preincident_here and s_type == "temperature": val = max(val, 25.0 + pre_progress * 500.0 + random.uniform(-30, 30))
+                        elif preincident_here and s_type == "pressure": val = max(val, 10.0 + pre_progress * 45.0 + random.uniform(-4, 4))
+                        elif s_type == "temperature":
                             val = max(val, 25.0 + prog * 930.0)
                         elif s_type == "pressure":
                             val = max(val, 10.0 + prog * 85.0)
 
                     elif active_inc["type"] == "compressor_vibration":
-                        if s_type == "vibration":
+                        if preincident_here and s_type == "vibration": val = max(val, 1.2 + pre_progress * 5.5 + random.uniform(-0.6, 0.6))
+                        elif s_type == "vibration":
                             val = max(val, 1.2 + prog * 9.5)
+
+                    elif active_inc["type"] == "boiler_overheat":
+                        if preincident_here and s_type == "temperature": val = max(val, 25.0 + pre_progress * 520.0 + random.uniform(-35, 35))
+                        elif preincident_here and s_type == "pressure": val = max(val, 10.0 + pre_progress * 35.0 + random.uniform(-4, 4))
+                        elif s_type == "temperature": val = max(val, 25.0 + prog * 900.0)
+                        elif s_type == "pressure": val = max(val, 10.0 + prog * 75.0)
 
                 # Inject benign negative spikes
                 if neg_here:
@@ -482,9 +502,14 @@ def generate_all_data(seed=42):
             risk_score = random.uniform(5.0, 12.0)
             
             if inc_here:
-                is_incident_imminent = 1
-                progress = (step - active_inc["start"]) / (active_inc["end"] - active_inc["start"])
-                risk_score = 15.0 + (progress * 75.0)
+                if preincident_here:
+                    is_incident_imminent = 1
+                    progress = max(0.0, min(1.0, (step - (active_inc["start"] - prediction_horizon_steps) + 1) / prediction_horizon_steps))
+                    risk_score = 12.0 + progress * 48.0 + random.uniform(-4.0, 4.0)
+                else:
+                    is_incident_imminent = 0
+                    progress = max(0.0, min(1.0, (step - active_inc["start"]) / max(1, active_inc["end"] - active_inc["start"])))
+                    risk_score = 55.0 + progress * 35.0 + random.uniform(-4.0, 4.0)
             elif neg_here:
                 progress = (step - active_neg["start"]) / (active_neg["end"] - active_neg["start"])
                 risk_score = 10.0 + (18.0 * (1.0 - abs(2.0 * progress - 1.0)))
@@ -497,7 +522,9 @@ def generate_all_data(seed=42):
 
             if random.random() < 0.35 or is_incident_imminent or neg_here:
                 row_dict = {
-                    "timestamp": timestamp.isoformat(),
+                     "timestamp": timestamp.isoformat(),
+                    "scenario_id": (active_inc["scenario_id"] if inc_here else (active_neg["scenario_id"] if neg_here else f"NORMAL-{step//48:04d}")),
+                    "scenario_type": (active_inc["type"] if inc_here else (active_neg["type"] if neg_here else "normal_operation")),
                     "zone_id": zone_id,
                     "sensor_anomaly_score": round(random.uniform(0.0, 0.3) if not (inc_here or neg_here) else random.uniform(0.4, 0.8), 3),
                     
@@ -517,11 +544,14 @@ def generate_all_data(seed=42):
                     "maintenance_overdue": maintenance_overdue_by_zone[zone_id],
                     "equipment_health_avg": round(equipment_health_avg_by_zone[zone_id], 2),
                     
-                    "recent_near_miss_count": 1 if inc_here and random.random() > 0.5 else 0,
+                    "recent_near_miss_count": 1 if random.random() < 0.08 else 0,
                     "shift_change": 1 if step % 96 == 0 else 0,
                     
                     "risk_score": round(risk_score, 2),
-                    "is_incident_imminent": is_incident_imminent
+                    "is_incident_imminent": is_incident_imminent,
+                    "incident_event_time": (start_date + timedelta(minutes=active_inc["start"] * 5)).isoformat() if inc_here else "",
+                    "minutes_to_incident": ((active_inc["start"] - step) * 5 if preincident_here else (0 if inc_here else "")),
+                    "event_occurred": 1 if post_event_here else 0
                 }
                 
                 # Merge sensor features
@@ -536,10 +566,10 @@ def generate_all_data(seed=42):
         writer.writerows(sensor_readings)
 
     # Compile fieldnames dynamically
-    window_fields = ["timestamp", "zone_id", "sensor_anomaly_score", "active_permits", "permit_overlap_count", 
+    window_fields = ["timestamp", "scenario_id", "scenario_type", "zone_id", "sensor_anomaly_score", "active_permits", "permit_overlap_count", 
                      "has_hot_work", "has_confined_space", "has_electrical_isolation", "simops_conflict", 
                      "worker_count", "worker_exposure_duration", "maintenance_overdue", "equipment_health_avg", 
-                     "recent_near_miss_count", "shift_change", "risk_score", "is_incident_imminent"]
+                     "recent_near_miss_count", "shift_change", "risk_score", "is_incident_imminent", "incident_event_time", "minutes_to_incident", "event_occurred"]
     for t in ["combustible_gas", "toxic_gas", "oxygen", "ventilation", "pressure", "vibration", "temperature"]:
         window_fields += [f"{t}_val", f"{t}_avg_30m", f"{t}_std_30m", f"{t}_slope_30m"]
 

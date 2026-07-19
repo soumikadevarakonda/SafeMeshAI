@@ -1,10 +1,10 @@
 {
-  "validation_timestamp": "2026-07-11T12:31:51.765465",
+  "validation_timestamp": "2026-07-11T20:14:31.137686",
   "row_counts": {
     "zones.csv": 10,
     "equipment.csv": 59,
     "sensors.csv": 172,
-    "sensor_readings.csv": 122125,
+    "sensor_readings.csv": 124068,
     "workers.csv": 250,
     "worker_locations.csv": 4488,
     "permits.csv": 2200,
@@ -12,7 +12,7 @@
     "shift_logs.csv": 2400,
     "incidents.csv": 520,
     "risk_rules.csv": 3,
-    "compound_risk_windows.csv": 10744
+    "compound_risk_windows.csv": 10419
   },
   "duplicate_ids": {
     "zones.csv": 0,
@@ -118,6 +118,8 @@
     },
     "compound_risk_windows.csv": {
       "timestamp": 0,
+      "scenario_id": 0,
+      "scenario_type": 0,
       "zone_id": 0,
       "sensor_anomaly_score": 0,
       "active_permits": 0,
@@ -134,6 +136,9 @@
       "shift_change": 0,
       "risk_score": 0,
       "is_incident_imminent": 0,
+      "incident_event_time": 10053,
+      "minutes_to_incident": 10053,
+      "event_occurred": 0,
       "combustible_gas_val": 0,
       "combustible_gas_avg_30m": 0,
       "combustible_gas_std_30m": 0,

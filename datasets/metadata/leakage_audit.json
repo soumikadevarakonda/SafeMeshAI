@@ -1,16 +1,13 @@
 {
   "status": "CLEAN",
-  "train_range": [
-    "2026-07-01T12:16:37.608452",
-    "2026-07-08T12:06:37.608452"
-  ],
-  "val_range": [
-    "2026-07-08T12:11:37.608452",
-    "2026-07-10T00:21:37.608452"
-  ],
-  "test_range": [
-    "2026-07-10T00:26:37.608452",
-    "2026-07-11T12:11:37.608452"
-  ],
+  "split_strategy": "scenario_group_chronological",
+  "train_scenarios": 53,
+  "validation_scenarios": 12,
+  "test_scenarios": 12,
+  "scenario_overlap": {
+    "train_val": 0,
+    "train_test": 0,
+    "val_test": 0
+  },
   "details": []
 }

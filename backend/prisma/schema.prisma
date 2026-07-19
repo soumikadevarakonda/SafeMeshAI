@@ -197,6 +197,14 @@ model RiskEvent {
   factors           RiskEventFactor[]
   evidence          RiskEventEvidence[]
   interventions     Intervention[]
+  
+  // AI Safety Officer Decision Layer additions (Optional/Nullable for backward compatibility)
+  reasoning            String?
+  observations         String?
+  recommendationsJson  String?
+  similarIncidentsJson String?
+  regulatoryRefsJson   String?
+  incidentSummary      String?
 }
 
 model RiskEventFactor {

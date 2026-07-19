@@ -72,11 +72,60 @@ async function initDbRefs() {
   permitId = permit?.id || '';
 }
 
+let simulationStepRunning = false;
+
+export async function runSimulationStepSafely(io: Server) {
+  if (simulationStepRunning) {
+    console.log('Skipping simulation tick: previous step still running');
+    return;
+  }
+
+  simulationStepRunning = true;
+
+  try {
+    await runSimulationStep(io);
+  } finally {
+    simulationStepRunning = false;
+  }
+}
+
+export function scheduleNextSimulationStep(io: Server) {
+  console.log(`[SIM SCHEDULER] scheduleNextSimulationStep called. Status: ${simState.status}, Speed: ${simState.speedMultiplier}`);
+  if (simState.status !== 'RUNNING') {
+    console.log(`[SIM SCHEDULER] Aborting step schedule: Status is not RUNNING`);
+    return;
+  }
+
+  const msPerStep = 2000 / simState.speedMultiplier;
+  console.log(`[SIM SCHEDULER] Scheduling next tick in ${msPerStep}ms`);
+
+  simState.intervalId = setTimeout(async () => {
+    console.log(`[SIM SCHEDULER] Timer fired! Running step safely...`);
+    simState.intervalId = null;
+
+    await runSimulationStepSafely(io);
+
+    if (simState.status === 'RUNNING') {
+      scheduleNextSimulationStep(io);
+    } else {
+      console.log(`[SIM SCHEDULER] Simulation no longer running, status: ${simState.status}`);
+    }
+  }, msPerStep);
+}
+
+
+
 export async function runSimulationStep(io: Server) {
   if (simState.status !== 'RUNNING') return;
 
+  
   simState.step += 10;
   console.log(`Simulation step: T+${simState.step} mins`);
+
+  io.emit('simulation:event', {
+  step: simState.step,
+  timestamp: new Date().toISOString()
+});
 
   if (!coZoneId) {
     await initDbRefs();
@@ -158,7 +207,11 @@ export async function runSimulationStep(io: Server) {
 
       const aiResponse = await runPython('predict.py', ['--zone', coZoneId, '--timestamp', timestamp.toISOString()]);
 
-      const { riskScore, severity, predictedIncident, confidence, leadTime, factors, interventions } = aiResponse;
+      const { predictedIncident, confidence, leadTime, factors, interventions } = aiResponse;
+
+// Scripted demo scenario guardrail
+const riskScore = Math.max(Number(aiResponse.riskScore) || 0, 72);
+const severity = riskScore >= 80 ? 'CRITICAL' : 'HIGH';
 
       await prisma.zone.update({
         where: { id: coZoneId },
@@ -173,7 +226,13 @@ export async function runSimulationStep(io: Server) {
           predictedIncident,
           confidence,
           leadTime,
-          status: 'ACTIVE'
+          status: 'ACTIVE',
+          reasoning: aiResponse.reasoning,
+          observations: aiResponse.observations,
+          recommendationsJson: JSON.stringify(aiResponse.recommendations),
+          similarIncidentsJson: JSON.stringify(aiResponse.similarIncidents),
+          regulatoryRefsJson: JSON.stringify(aiResponse.regulatoryReferences),
+          incidentSummary: aiResponse.incidentSummary
         }
       });
       simState.riskEventId = riskEvent.id;
@@ -219,12 +278,23 @@ export async function runSimulationStep(io: Server) {
       }
 
       const aiResponse = await runPython('predict.py', ['--zone', coZoneId, '--timestamp', timestamp.toISOString()]);
-      const { riskScore, severity } = aiResponse;
+      // Scripted demo escalation guardrail
+const riskScore = Math.max(Number(aiResponse.riskScore) || 0, 88);
+const severity = 'CRITICAL';
 
       if (simState.riskEventId) {
         await prisma.riskEvent.update({
           where: { id: simState.riskEventId },
-          data: { score: riskScore, severity }
+          data: { 
+            score: riskScore, 
+            severity,
+            reasoning: aiResponse.reasoning,
+            observations: aiResponse.observations,
+            recommendationsJson: JSON.stringify(aiResponse.recommendations),
+            similarIncidentsJson: JSON.stringify(aiResponse.similarIncidents),
+            regulatoryRefsJson: JSON.stringify(aiResponse.regulatoryReferences),
+            incidentSummary: aiResponse.incidentSummary
+          }
         });
       }
 
@@ -273,38 +343,65 @@ export async function runSimulationStep(io: Server) {
     }
 
     // Broadcast current status
-    io.emit('simulation:event', { step: simState.step, timestamp: timestamp.toISOString() });
+    
     io.emit('dashboard:update', { timestamp: timestamp.toISOString() });
 
   } catch (err: any) {
     console.error("Error in simulation tick:", err.message);
+  } finally {
+    simulationStepRunning = false;
   }
 }
 
-export async function executeInterventionInSimulation(interventionId: string, io: Server) {
+export async function executeInterventionInSimulation(
+  interventionId: string,
+  io: Server
+) {
   console.log(`Executing intervention: ${interventionId}`);
+
+  await initDbRefs();
+
   const timestamp = new Date();
 
   try {
     const intervention = await prisma.intervention.findUnique({
-      where: { id: interventionId }
+      where: { id: interventionId },
+      include: {
+        riskEvent: true,
+        actions: true
+      }
     });
-    if (!intervention) return;
 
-    // 1. Update intervention status
+    if (!intervention) {
+      throw new Error(`Intervention ${interventionId} not found`);
+    }
+
+    const riskEventId = intervention.riskEventId;
+    const zoneId = intervention.riskEvent.zoneId;
+
+    // --------------------------------------------------
+    // 1. MARK INTERVENTION AS EXECUTING
+    // --------------------------------------------------
+
     await prisma.intervention.update({
       where: { id: interventionId },
-      data: { status: 'COMPLETED', executedTime: timestamp, executedBy: 'Sarah Jenkins (Safety Officer)' }
+      data: {
+        status: 'EXECUTING',
+        executedTime: timestamp,
+        executedBy: 'Sarah Jenkins (Safety Officer)'
+      }
     });
 
-    await prisma.interventionAction.updateMany({
-      where: { interventionId },
-      data: { status: 'EXECUTED', executedTime: timestamp }
+    io.emit('intervention:started', {
+      interventionId,
+      riskEventId,
+      zoneId
     });
 
-    io.emit('intervention:started', { interventionId });
+    // --------------------------------------------------
+    // 2. SUSPEND HOT WORK PERMIT
+    // --------------------------------------------------
 
-    // 2. Perform actions: Suspend permit
     if (permitId) {
       await prisma.permit.update({
         where: { id: permitId },
@@ -312,65 +409,228 @@ export async function executeInterventionInSimulation(interventionId: string, io
       });
     }
 
-    // 3. Evacuate workers
-    if (w1Id && w2Id) {
-      await prisma.worker.update({ where: { id: w1Id }, data: { currentZoneId: null, status: 'EVACUATED' } });
-      await prisma.worker.update({ where: { id: w2Id }, data: { currentZoneId: null, status: 'EVACUATED' } });
-      
-      await prisma.workerLocationEvent.create({ data: { workerId: w1Id, zoneId: coZoneId, eventType: 'EXIT', timestamp } });
-      await prisma.workerLocationEvent.create({ data: { workerId: w2Id, zoneId: coZoneId, eventType: 'EXIT', timestamp } });
-    }
+    // --------------------------------------------------
+    // 3. EVACUATE WORKERS
+    // --------------------------------------------------
 
-    // 4. Override ventilation (returns to normal, gas clears)
-    if (coEquipId) {
-      await prisma.equipment.update({
-        where: { id: coEquipId },
-        data: { status: 'OPERATIONAL', healthScore: 100.0 }
+    for (const workerId of [w1Id, w2Id]) {
+      if (!workerId) continue;
+
+      await prisma.worker.update({
+        where: { id: workerId },
+        data: {
+          currentZoneId: null,
+          status: 'EVACUATED'
+        }
+      });
+
+      await prisma.workerLocationEvent.create({
+        data: {
+          workerId,
+          zoneId,
+          eventType: 'EXIT',
+          timestamp: new Date()
+        }
       });
     }
 
-    // Recalculate risk score downwards stepwise to simulate the mitigation process
-    const stepsDown = [88.0, 72.0, 55.0, 38.0, 24.0];
-    
-    for (let i = 0; i < stepsDown.length; i++) {
-      const currentScore = stepsDown[i];
-      const severity = currentScore >= 80 ? 'CRITICAL' : (currentScore >= 60 ? 'HIGH' : (currentScore >= 35 ? 'MEDIUM' : 'LOW'));
-      
-      setTimeout(async () => {
-        // Stepwise update gas & ventilation sensors
-        const gasVal = Math.max(0.0, 24.5 - i * 6.0);
-        const ventVal = Math.min(100.0, 58.0 + i * 10.0);
+    // --------------------------------------------------
+    // 4. RESTORE EQUIPMENT CONDITION
+    // --------------------------------------------------
 
-        if (gasSensorId && ventSensorId) {
-          await prisma.sensor.update({ where: { id: gasSensorId }, data: { lastReading: gasVal, lastReadingTime: new Date(), status: gasVal >= 20 ? 'WARNING' : 'NORMAL' } });
-          await prisma.sensor.update({ where: { id: ventSensorId }, data: { lastReading: ventVal, lastReadingTime: new Date(), status: ventVal <= 70 ? 'WARNING' : 'NORMAL' } });
+    if (coEquipId) {
+      await prisma.equipment.update({
+        where: { id: coEquipId },
+        data: {
+          status: 'OPERATIONAL',
+          healthScore: 100
         }
-
-        await prisma.zone.update({
-          where: { id: coZoneId },
-          data: { riskScore: currentScore, riskSeverity: severity }
-        });
-
-        if (simState.riskEventId) {
-          await prisma.riskEvent.update({
-            where: { id: simState.riskEventId },
-            data: { score: currentScore, severity, status: currentScore < 35.0 ? 'MITIGATED' : 'ACTIVE', closedTime: currentScore < 35.0 ? new Date() : null }
-          });
-        }
-
-        io.emit('zone:risk-update', { zoneId: coZoneId, score: currentScore, severity });
-        io.emit('sensor:update', { sensorId: gasSensorId, value: gasVal });
-        io.emit('sensor:update', { sensorId: ventSensorId, value: ventVal });
-        io.emit('intervention:progress', { interventionId, progress: (i + 1) * 20, score: currentScore });
-        io.emit('dashboard:update', { timestamp: new Date().toISOString() });
-        
-        if (i === stepsDown.length - 1) {
-          io.emit('intervention:completed', { interventionId });
-        }
-      }, i * 1500); // 1.5 second intervals
+      });
     }
 
+    // --------------------------------------------------
+    // 5. GRADUAL RISK REDUCTION
+    // --------------------------------------------------
+
+    const riskSteps = [72, 55, 38, 24];
+    const gasSteps = [19.5, 14.0, 8.0, 4.0];
+    const ventSteps = [65.0, 75.0, 88.0, 95.0];
+
+    for (let i = 0; i < riskSteps.length; i++) {
+      await new Promise(resolve => setTimeout(resolve, 1500));
+
+      const currentScore = riskSteps[i];
+      const gasValue = gasSteps[i];
+      const ventValue = ventSteps[i];
+
+      const severity =
+        currentScore >= 80
+          ? 'CRITICAL'
+          : currentScore >= 60
+          ? 'HIGH'
+          : currentScore >= 35
+          ? 'MEDIUM'
+          : 'LOW';
+
+      await prisma.zone.update({
+        where: { id: zoneId },
+        data: {
+          riskScore: currentScore,
+          riskSeverity: severity
+        }
+      });
+
+      await prisma.riskEvent.update({
+        where: { id: riskEventId },
+        data: {
+          score: currentScore,
+          severity,
+          status: i === riskSteps.length - 1
+            ? 'MITIGATED'
+            : 'ACTIVE'
+        }
+      });
+
+      const readingTime = new Date();
+
+if (gasSensorId) {
+  await prisma.$transaction([
+    prisma.sensorReading.create({
+      data: {
+        sensorId: gasSensorId,
+        value: gasValue,
+        timestamp: readingTime
+      }
+    }),
+
+    prisma.sensor.update({
+      where: { id: gasSensorId },
+      data: {
+        lastReading: gasValue,
+        lastReadingTime: readingTime,
+        status:
+          gasValue >= 40
+            ? 'CRITICAL'
+            : gasValue >= 20
+            ? 'WARNING'
+            : 'NORMAL'
+      }
+    })
+  ]);
+}
+
+if (ventSensorId) {
+  await prisma.$transaction([
+    prisma.sensorReading.create({
+      data: {
+        sensorId: ventSensorId,
+        value: ventValue,
+        timestamp: readingTime
+      }
+    }),
+
+    prisma.sensor.update({
+      where: { id: ventSensorId },
+      data: {
+        lastReading: ventValue,
+        lastReadingTime: readingTime,
+        status:
+          ventValue < 50
+            ? 'CRITICAL'
+            : ventValue < 70
+            ? 'WARNING'
+            : 'NORMAL'
+      }
+    })
+  ]);
+}
+
+      io.emit('zone:risk-update', {
+        zoneId,
+        score: currentScore,
+        severity
+      });
+
+      io.emit('risk:updated', {
+        riskId: riskEventId,
+        zoneId,
+        score: currentScore,
+        severity,
+        status:
+          i === riskSteps.length - 1
+            ? 'MITIGATED'
+            : 'ACTIVE'
+      });
+
+      io.emit('sensor:update', {
+        sensorId: gasSensorId,
+        value: gasValue
+      });
+
+      io.emit('sensor:update', {
+        sensorId: ventSensorId,
+        value: ventValue
+      });
+
+      io.emit('intervention:progress', {
+        interventionId,
+        progress: Math.round(
+          ((i + 1) / riskSteps.length) * 100
+        ),
+        score: currentScore
+      });
+
+      io.emit('dashboard:update', {
+        timestamp: new Date().toISOString()
+      });
+    }
+
+    // --------------------------------------------------
+    // 6. COMPLETE ACTIONS
+    // --------------------------------------------------
+
+    await prisma.interventionAction.updateMany({
+      where: { interventionId },
+      data: {
+        status: 'EXECUTED',
+        executedTime: new Date()
+      }
+    });
+
+    // --------------------------------------------------
+    // 7. COMPLETE INTERVENTION
+    // --------------------------------------------------
+
+    await prisma.intervention.update({
+      where: { id: interventionId },
+      data: {
+        status: 'COMPLETED'
+      }
+    });
+
+    io.emit('intervention:completed', {
+      interventionId,
+      riskEventId,
+      zoneId,
+      finalRiskScore: 24,
+      severity: 'LOW'
+    });
+
+    io.emit('dashboard:update', {
+      timestamp: new Date().toISOString()
+    });
+
+    console.log(
+      `Intervention ${interventionId} completed successfully`
+    );
+
   } catch (err: any) {
-    console.error("Error executing intervention simulation:", err.message);
+    console.error(
+      'Error executing intervention simulation:',
+      err
+    );
+
+    throw err;
   }
 }
+

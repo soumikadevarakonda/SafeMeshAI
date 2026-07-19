@@ -1,50 +1,88 @@
 {
   "metadata": {
-    "evaluated_at": "2026-07-11T12:18:07.250638",
-    "test_set_size": 1612,
-    "model_version": "v1.0.0"
+    "evaluated_at": "2026-07-11T20:08:16.353578",
+    "test_set_size": 1561,
+    "decision_threshold": 0.8,
+    "split_type": "scenario_group_holdout",
+    "total_incident_scenarios": 2,
+    "model_version": "v2.1.0"
   },
   "baseline": {
-    "accuracy": 0.8877171215880894,
-    "precision": 0.11688311688311688,
-    "recall": 0.07377049180327869,
-    "f1": 0.09045226130653267,
-    "specificity": 0.9543624161073826,
+    "accuracy": 0.866111467008328,
+    "precision": 0.0,
+    "recall": 0.0,
+    "f1": 0,
+    "specificity": 0.8796356538711776,
     "confusion_matrix": [
       [
-        1422,
-        68
-      ],
-      [
-        113,
-        9
-      ]
-    ],
-    "avg_lead_time_min": 0.0,
-    "median_lead_time_min": 0.0,
-    "incidents_detected": 0,
-    "incidents_missed": 2
-  },
-  "compound": {
-    "accuracy": 0.9851116625310173,
-    "precision": 1.0,
-    "recall": 0.8032786885245902,
-    "f1": 0.8909090909090909,
-    "specificity": 1.0,
-    "confusion_matrix": [
-      [
-        1490,
-        0
+        1352,
+        185
       ],
       [
         24,
-        98
+        0
       ]
     ],
-    "avg_lead_time_min": 0.0,
-    "median_lead_time_min": 0.0,
+    "avg_lead_time_min": null,
+    "median_lead_time_min": null,
     "incidents_detected": 0,
-    "incidents_missed": 2
+    "incidents_missed": 2,
+    "incident_detection_rate": 0.0,
+    "lead_times_min": []
   },
-  "lead_time_improvement_min": 0.0
+  "compound": {
+    "accuracy": 0.988468930172966,
+    "precision": 0.75,
+    "recall": 0.375,
+    "f1": 0.5,
+    "specificity": 0.9980481457384516,
+    "confusion_matrix": [
+      [
+        1534,
+        3
+      ],
+      [
+        15,
+        9
+      ]
+    ],
+    "avg_lead_time_min": 45.0,
+    "median_lead_time_min": 45.0,
+    "incidents_detected": 1,
+    "incidents_missed": 1,
+    "incident_detection_rate": 0.5,
+    "lead_times_min": [
+      45.0
+    ]
+  },
+  "paired_lead_time_comparison": {
+    "scenarios_detected_by_both": 0,
+    "avg_improvement_min": null,
+    "median_improvement_min": null,
+    "individual_improvements_min": []
+  },
+  "scenario_results": [
+    {
+      "scenario_id": "SCN-2500",
+      "scenario_type": "blast_furnace_rupture",
+      "incident_event_time": "2026-07-10T12:26:13.789862",
+      "baseline_detected": false,
+      "compound_detected": false,
+      "baseline_first_alert_time": null,
+      "compound_first_alert_time": null,
+      "baseline_lead_time_min": null,
+      "compound_lead_time_min": null
+    },
+    {
+      "scenario_id": "SCN-2700",
+      "scenario_type": "compressor_vibration",
+      "incident_event_time": "2026-07-11T05:06:13.789862",
+      "baseline_detected": false,
+      "compound_detected": true,
+      "baseline_first_alert_time": null,
+      "compound_first_alert_time": "2026-07-11T04:21:13.789862",
+      "baseline_lead_time_min": null,
+      "compound_lead_time_min": 45.0
+    }
+  ]
 }

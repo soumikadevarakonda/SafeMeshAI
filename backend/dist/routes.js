@@ -385,6 +385,7 @@ function setupRouter(io) {
         try {
             if (simulation_1.simState.intervalId) {
                 clearInterval(simulation_1.simState.intervalId);
+                simulation_1.simState.intervalId = null;
             }
             simulation_1.simState.status = 'RUNNING';
             simulation_1.simState.step = 0;
@@ -400,10 +401,7 @@ function setupRouter(io) {
                     data: { riskScore: 0.0, riskSeverity: 'LOW' }
                 });
             }
-            const msPerStep = 2000 / simulation_1.simState.speedMultiplier;
-            simulation_1.simState.intervalId = setInterval(() => {
-                (0, simulation_1.runSimulationStep)(io);
-            }, msPerStep);
+            (0, simulation_1.scheduleNextSimulationStep)(io);
             io.emit('simulation:status', { status: 'RUNNING', step: 0 });
             res.json({ status: 'started', simulationId: simulation_1.simState.runId });
         }
@@ -421,12 +419,25 @@ function setupRouter(io) {
         res.json({ status: 'paused' });
     });
     router.post('/simulations/:simulationId/resume', authenticateToken, (req, res) => {
+        if (simulation_1.simState.intervalId) {
+            clearInterval(simulation_1.simState.intervalId);
+            simulation_1.simState.intervalId = null;
+        }
+        if (simulation_1.simState.status === 'COMPLETED') {
+            return res.status(400).json({
+                error: 'Completed simulation cannot be resumed. Start a new simulation.'
+            });
+        }
         simulation_1.simState.status = 'RUNNING';
-        const msPerStep = 2000 / simulation_1.simState.speedMultiplier;
-        simulation_1.simState.intervalId = setInterval(() => {
-            (0, simulation_1.runSimulationStep)(io);
-        }, msPerStep);
-        io.emit('simulation:status', { status: 'RUNNING', step: simulation_1.simState.step });
+        if (simulation_1.simState.intervalId) {
+            clearTimeout(simulation_1.simState.intervalId);
+            simulation_1.simState.intervalId = null;
+        }
+        (0, simulation_1.scheduleNextSimulationStep)(io);
+        io.emit('simulation:status', {
+            status: 'RUNNING',
+            step: simulation_1.simState.step
+        });
         res.json({ status: 'resumed' });
     });
     router.post('/simulations/:simulationId/reset', authenticateToken, async (req, res) => {

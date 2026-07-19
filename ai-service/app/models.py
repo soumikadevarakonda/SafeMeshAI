@@ -1,6 +1,5 @@
-import os
-import json
-import math
+import os, json, math, csv
+from datetime import datetime
 
 class SafetyModels:
     def __init__(self):
@@ -16,8 +15,6 @@ class SafetyModels:
             "vibration_val", "vibration_avg_30m", "vibration_std_30m", "vibration_slope_30m",
             "temperature_val", "temperature_avg_30m", "temperature_std_30m", "temperature_slope_30m"
         ]
-        
-        # Baselines
         self.baselines = {
             "combustible_gas": 40.0,      # LEL% critical threshold
             "toxic_gas": 100.0,            # ppm critical
@@ -27,210 +24,88 @@ class SafetyModels:
             "vibration": 10.0,             # mm/s critical
             "temperature": 950.0           # °C critical
         }
-        
-        # Model parameters
-        self.weights = {feat: 0.0 for feat in self.features_list}
-        self.bias = -2.5 # default negative bias for rare events
-        self.anomaly_means = {feat: 0.0 for feat in self.features_list}
-        self.anomaly_stds = {feat: 1.0 for feat in self.features_list}
+        self.weights = {f:0.0 for f in self.features_list}
+        self.bias = 0.0
+        self.means = [0.0]*len(self.features_list)
+        self.stds = [1.0]*len(self.features_list)
+        self.anomaly_means = {f:0.0 for f in self.features_list}
+        self.anomaly_stds = {f:1.0 for f in self.features_list}
+        self.decision_threshold = 0.5
 
-    def predict_baseline(self, features):
-        """
-        Single-sensor baseline. Returns 1 if any sensor violates its threshold, 0 otherwise.
-        """
-        if features.get("combustible_gas_val", 0.0) >= self.baselines["combustible_gas"]:
-            return 1
-        if features.get("toxic_gas_val", 0.0) >= self.baselines["toxic_gas"]:
-            return 1
-        if features.get("oxygen_val", 20.9) <= self.baselines["oxygen"]:
-            return 1
-        if features.get("ventilation_val", 100.0) <= self.baselines["ventilation"]:
-            return 1
-        if features.get("pressure_val", 0.0) >= self.baselines["pressure"]:
-            return 1
-        if features.get("vibration_val", 0.0) >= self.baselines["vibration"]:
-            return 1
-        if features.get("temperature_val", 0.0) >= self.baselines["temperature"]:
-            return 1
-        return 0
+    def predict_baseline(self, x):
+        return int(x.get("combustible_gas_val",0)>=40 or x.get("toxic_gas_val",0)>=100 or
+                   x.get("oxygen_val",20.9)<=18 or x.get("ventilation_val",100)<=50 or
+                   x.get("pressure_val",0)>=90 or x.get("vibration_val",0)>=10 or x.get("temperature_val",0)>=950)
 
-    def load_csv_data(self, path):
-        import csv
-        rows = []
-        with open(path, "r", encoding="utf-8") as f:
-            reader = csv.DictReader(f)
-            for row in reader:
-                converted = {}
-                for k, v in row.items():
-                    if k in ["zone_id", "timestamp"]:
-                        converted[k] = v
-                    else:
-                        converted[k] = float(v) if v else 0.0
-                rows.append(converted)
+    def load_csv_data(self,path):
+        rows=[]
+        with open(path,encoding="utf-8") as f:
+            for r in csv.DictReader(f):
+                rows.append({k:(v if k in ("zone_id","timestamp","scenario_id","scenario_type","incident_event_time") else float(v or 0)) for k,v in r.items()})
         return rows
 
-    def train(self, train_path, val_path, save_dir):
-        """
-        Trains a Logistic Regression model via Gradient Descent,
-        and fits z-score anomaly means/stds. All in pure Python!
-        """
-        os.makedirs(save_dir, exist_ok=True)
-        
-        print("Loading training data...")
-        train_data = self.load_csv_data(train_path)
-        val_data = self.load_csv_data(val_path)
+    @staticmethod
+    def _sigmoid(z): return 1/(1+math.exp(-max(-20,min(20,z))))
+    @staticmethod
+    def _metrics(y,p):
+        tp=sum(a==1 and b==1 for a,b in zip(y,p)); tn=sum(a==0 and b==0 for a,b in zip(y,p))
+        fp=sum(a==0 and b==1 for a,b in zip(y,p)); fn=sum(a==1 and b==0 for a,b in zip(y,p))
+        precision=tp/(tp+fp) if tp+fp else 0; recall=tp/(tp+fn) if tp+fn else 0
+        return {"tp":tp,"tn":tn,"fp":fp,"fn":fn,"accuracy":(tp+tn)/len(y) if y else 0,
+                "precision":precision,"recall":recall,"specificity":tn/(tn+fp) if tn+fp else 0,
+                "f1":2*precision*recall/(precision+recall) if precision+recall else 0}
 
-        # 1. Fit Anomaly Detection parameters (means/stds on normal data)
-        normal_samples = [row for row in train_data if row.get("is_incident_imminent", 0) == 0]
-        if not normal_samples:
-            normal_samples = train_data
-            
-        n_normal = len(normal_samples)
-        for feat in self.features_list:
-            vals = [row.get(feat, 0.0) for row in normal_samples]
-            mean_val = sum(vals) / n_normal
-            variance = sum((x - mean_val) ** 2 for x in vals) / n_normal
-            std_val = math.sqrt(variance)
-            self.anomaly_means[feat] = mean_val
-            # Avoid divide-by-zero
-            self.anomaly_stds[feat] = std_val if std_val > 1e-4 else 1.0
+    def train(self,train_path,val_path,save_dir):
+        os.makedirs(save_dir,exist_ok=True)
+        tr=self.load_csv_data(train_path); va=self.load_csv_data(val_path)
+        normal=[r for r in tr if int(r["is_incident_imminent"])==0] or tr
+        for f in self.features_list:
+            vals=[r.get(f,0) for r in normal]; m=sum(vals)/len(vals); sd=math.sqrt(sum((v-m)**2 for v in vals)/len(vals))
+            self.anomaly_means[f]=m; self.anomaly_stds[f]=sd if sd>1e-4 else 1.0
+        X=[[r.get(f,0) for f in self.features_list] for r in tr]; y=[int(r["is_incident_imminent"]) for r in tr]
+        for j in range(len(self.features_list)):
+            col=[x[j] for x in X]; self.means[j]=sum(col)/len(col); v=sum((q-self.means[j])**2 for q in col)/len(col); self.stds[j]=math.sqrt(v) if v>1e-4 else 1.0
+        X=[[ (x[j]-self.means[j])/self.stds[j] for j in range(len(x))] for x in X]
+        pos=sum(y); neg=len(y)-pos; pos_w=len(y)/(2*pos) if pos else 1; neg_w=len(y)/(2*neg) if neg else 1
+        w=[0.0]*len(self.features_list); b=0.0; lr=.03
+        for epoch in range(160):
+            gw=[0.0]*len(w); gb=0.0
+            for x,yi in zip(X,y):
+                pr=self._sigmoid(sum(a*c for a,c in zip(x,w))+b); sw=pos_w if yi else neg_w; e=(pr-yi)*sw
+                for j in range(len(w)): gw[j]+=e*x[j]
+                gb+=e
+            n=len(X)
+            for j in range(len(w)): w[j]-=lr*(gw[j]/n + 0.001*w[j])
+            b-=lr*gb/n
+        self.weights={f:w[i] for i,f in enumerate(self.features_list)}; self.bias=b
+        def probs(rows):
+            return [self._sigmoid(sum(((r.get(f,0)-self.means[j])/self.stds[j])*w[j] for j,f in enumerate(self.features_list))+b) for r in rows]
+        vp=probs(va); vy=[int(r["is_incident_imminent"]) for r in va]
+        best=(0.5,-1,None)
+        for t in [i/100 for i in range(20,81,2)]:
+            m=self._metrics(vy,[int(q>=t) for q in vp])
+            if m["f1"]>best[1]: best=(t,m["f1"],m)
+        self.decision_threshold=best[0]
+        train_m=self._metrics(y,[int(q>=self.decision_threshold) for q in probs(tr)])
+        val_m=best[2]
+        with open(os.path.join(save_dir,"model_params.json"),"w") as f:
+            json.dump({"weights":self.weights,"bias":b,"means":self.means,"stds":self.stds,"anomaly_means":self.anomaly_means,"anomaly_stds":self.anomaly_stds,"decision_threshold":self.decision_threshold},f,indent=2)
+        with open(os.path.join(save_dir,"model_metrics.json"),"w") as f:
+            json.dump({"train":train_m,"validation":val_m,"decision_threshold":self.decision_threshold,"train_class_distribution":{"positive":pos,"negative":neg},"validation_class_distribution":{"positive":sum(vy),"negative":len(vy)-sum(vy)},"trained_at":datetime.now().isoformat(),"num_features":len(self.features_list)},f,indent=2)
+        print(f"Models trained. Validation F1={val_m['f1']:.4f}, threshold={self.decision_threshold:.2f}")
 
-        # 2. Train Logistic Regression Classifier
-        # Features X and labels y
-        X_train = []
-        y_train = []
-        for row in train_data:
-            X_train.append([row.get(feat, 0.0) for feat in self.features_list])
-            y_train.append(int(row.get("is_incident_imminent", 0)))
+    def load(self,save_dir):
+        path=os.path.join(save_dir,"model_params.json")
+        if not os.path.exists(path): return False
+        with open(path) as f: d=json.load(f)
+        self.weights=d["weights"]; self.bias=d["bias"]; self.means=d["means"]; self.stds=d["stds"]
+        self.anomaly_means=d["anomaly_means"]; self.anomaly_stds=d["anomaly_stds"]; self.decision_threshold=d.get("decision_threshold",.5)
+        return True
 
-        # Standard scaling / normalization parameters for Logistic Regression
-        means = []
-        stds = []
-        for j, feat in enumerate(self.features_list):
-            col_vals = [x[j] for x in X_train]
-            m = sum(col_vals) / len(col_vals)
-            v = sum((x - m)**2 for x in col_vals) / len(col_vals)
-            s = math.sqrt(v) if v > 1e-4 else 1.0
-            means.append(m)
-            stds.append(s)
-
-        # Scale training features
-        X_train_scaled = []
-        for x in X_train:
-            scaled_row = []
-            for j in range(len(self.features_list)):
-                scaled_row.append((x[j] - means[j]) / stds[j])
-            X_train_scaled.append(scaled_row)
-
-        # Gradient Descent
-        print(f"Training Classifier with Gradient Descent on {len(X_train_scaled)} samples...")
-        lr = 0.1
-        epochs = 120
-        self.weights = {feat: 0.0 for feat in self.features_list}
-        self.bias = -2.0
-        w_list = [0.0] * len(self.features_list)
-
-        for epoch in range(epochs):
-            for i in range(len(X_train_scaled)):
-                xi = X_train_scaled[i]
-                yi = y_train[i]
-                
-                # dot product
-                z = sum(xi[j] * w_list[j] for j in range(len(w_list))) + self.bias
-                # Sigmoid
-                pred = 1.0 / (1.0 + math.exp(-max(-20, min(20, z))))
-                
-                # Gradient update
-                error = yi - pred
-                for j in range(len(w_list)):
-                    w_list[j] += lr * error * xi[j] * 0.01 # mini-batch damping
-                self.bias += lr * error * 0.01
-
-        # Save weights
-        for j, feat in enumerate(self.features_list):
-            self.weights[feat] = w_list[j]
-
-        # Calculate train/val accuracy
-        # Train accuracy
-        train_corr = 0
-        for i, x in enumerate(X_train_scaled):
-            z = sum(x[j] * w_list[j] for j in range(len(w_list))) + self.bias
-            pred = 1 if (1.0 / (1.0 + math.exp(-max(-20, min(20, z))))) >= 0.5 else 0
-            if pred == y_train[i]:
-                train_corr += 1
-        train_acc = train_corr / len(X_train_scaled)
-
-        # Save model params to JSON
-        model_data = {
-            "weights": self.weights,
-            "bias": self.bias,
-            "means": means,
-            "stds": stds,
-            "anomaly_means": self.anomaly_means,
-            "anomaly_stds": self.anomaly_stds
-        }
-        
-        with open(os.path.join(save_dir, "model_params.json"), "w") as f:
-            json.dump(model_data, f, indent=2)
-
-        # Save model metrics
-        metrics = {
-            "train_accuracy": float(train_acc),
-            "val_accuracy": float(train_acc), # for prototype, match train
-            "trained_at": datetime.now().isoformat(),
-            "num_features": len(self.features_list)
-        }
-        with open(os.path.join(save_dir, "model_metrics.json"), "w") as f:
-            json.dump(metrics, f, indent=2)
-
-        print(f"Models successfully trained! Train Accuracy: {train_acc:.4f}")
-
-    def load(self, save_dir):
-        path = os.path.join(save_dir, "model_params.json")
-        if os.path.exists(path):
-            with open(path, "r") as f:
-                model_data = json.load(f)
-            self.weights = model_data["weights"]
-            self.bias = model_data["bias"]
-            self.means = model_data["means"]
-            self.stds = model_data["stds"]
-            self.anomaly_means = model_data["anomaly_means"]
-            self.anomaly_stds = model_data["anomaly_stds"]
-            self.rf_model = True # Mock loader flag
-            return True
-        return False
-
-    def predict(self, features_dict):
-        # 1. Incident probability using scaled logistic regression
-        if not hasattr(self, "means"):
-            # Default fallback if not trained
-            return 0.05, 0.02, 0
-
-        scaled = []
-        for j, feat in enumerate(self.features_list):
-            val = float(features_dict.get(feat, 0.0))
-            m = self.means[j]
-            s = self.stds[j]
-            scaled.append((val - m) / s)
-
-        z = sum(scaled[j] * self.weights[feat] for j, feat in enumerate(self.features_list)) + self.bias
-        prob = 1.0 / (1.0 + math.exp(-max(-20, min(20, z))))
-
-        # 2. Anomaly score: average absolute Z-score of features from normal state
-        z_scores = []
-        for feat in self.features_list:
-            val = float(features_dict.get(feat, 0.0))
-            m = self.anomaly_means.get(feat, 0.0)
-            s = self.anomaly_stds.get(feat, 1.0)
-            z_scores.append(abs((val - m) / s))
-            
-        avg_z = sum(z_scores) / len(z_scores)
-        # Normalize anomaly score to [0, 1] range
-        anomaly_score = 1.0 - (1.0 / (1.0 + math.exp(avg_z - 3.0)))
-
-        # 3. Baseline
-        baseline_triggered = self.predict_baseline(features_dict)
-
-        return prob, anomaly_score, baseline_triggered
-
-from datetime import datetime
+    def predict(self,features_dict):
+        scaled=[(float(features_dict.get(f,0))-self.means[j])/self.stds[j] for j,f in enumerate(self.features_list)]
+        prob=self._sigmoid(sum(scaled[j]*self.weights[f] for j,f in enumerate(self.features_list))+self.bias)
+        zs=[abs((float(features_dict.get(f,0))-self.anomaly_means[f])/self.anomaly_stds[f]) for f in self.features_list]
+        avg_z=sum(zs)/len(zs)
+        anomaly_score=1.0-(1.0/(1.0+math.exp(-max(-20,min(20,avg_z-3.0)))))
+        return prob, anomaly_score, self.predict_baseline(features_dict)

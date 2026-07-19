@@ -91,7 +91,13 @@ def test_evaluation_metrics():
     y_true = [0, 0, 1, 1]
     y_pred = [0, 1, 0, 1]
     
-    accuracy, precision, recall, f1, specificity, cm = compute_metrics(y_true, y_pred)
+    metrics = compute_metrics(y_true, y_pred)
+    accuracy = metrics["accuracy"]
+    precision = metrics["precision"]
+    recall = metrics["recall"]
+    f1 = metrics["f1"]
+    specificity = metrics["specificity"]
+    cm = metrics["confusion_matrix"]
     
     assert accuracy == 0.5
     assert precision == 0.5
