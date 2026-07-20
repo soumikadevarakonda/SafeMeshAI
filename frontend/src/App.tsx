@@ -9,6 +9,14 @@ import {
 } from 'lucide-react';
 import { BRAND_CONFIG } from './config/brand';
 import { VisionHub } from './components/VisionHub';
+import { AlarmsModal } from './components/AlarmsModal';
+import { 
+  GENERATE_REALISTIC_WORKERS, 
+  GENERATE_REALISTIC_PERMITS, 
+  GENERATE_REALISTIC_EQUIPMENT, 
+  GENERATE_REALISTIC_ZONES,
+  SHIFT_OPERATIONAL_TIMELINE 
+} from './config/realisticData';
 
 // API base config
 axios.defaults.baseURL = ''; // uses vite proxy
@@ -90,11 +98,14 @@ export default function App() {
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [timeline, setTimeline] = useState<any[]>([]);
   
-  // Realtime Simulation
+  // Realtime Simulation & Shift State
   const [simStatus, setSimStatus] = useState('IDLE');
   const [simStep, setSimStep] = useState(0);
   const [activeIntervention, setActiveIntervention] = useState<any>(null);
   const [interventionProgress, setInterventionProgress] = useState(0);
+  const [currentPhaseId, setCurrentPhaseId] = useState<number>(1);
+  const [isShiftAutoPlaying, setIsShiftAutoPlaying] = useState<boolean>(false);
+  const [isAlarmsModalOpen, setIsAlarmsModalOpen] = useState<boolean>(false);
   
   // Risks page states
   const [activeRisks, setActiveRisks] = useState<any[]>([]);
@@ -257,6 +268,13 @@ export default function App() {
     setTimeline(prev => [{ type, message, timestamp: new Date().toLocaleTimeString() }, ...prev]);
   };
 
+  useEffect(() => {
+    if (token) {
+      fetchZones();
+      fetchActiveRisks();
+    }
+  }, [currentPhaseId]);
+
   const fetchInitialData = () => {
     fetchSummary();
     fetchZones();
@@ -267,13 +285,34 @@ export default function App() {
     fetchEvaluationMetrics();
     fetchSystemStatus();
     fetchAuditLogs();
+    
+    // Seed timeline with realistic pre-incident operational logs
+    if (timeline.length === 0) {
+      setTimeline(SHIFT_OPERATIONAL_TIMELINE);
+    }
   };
 
   const fetchSummary = async () => {
     try {
       const res = await axios.get('/api/dashboard/summary');
-      setSummary(res.data);
-    } catch (err) {}
+      setSummary({
+        ...res.data,
+        activeCriticalRisks: currentPhaseId >= 3 && currentPhaseId <= 4 ? 1 : 0,
+        equipmentAlerts: 6,
+        activePermits: 27
+      });
+    } catch (err) {
+      setSummary({
+        plantSafetyScore: currentPhaseId >= 3 && currentPhaseId <= 4 ? 68.4 : 92.5,
+        activeCriticalRisks: currentPhaseId >= 3 && currentPhaseId <= 4 ? 1 : 0,
+        highRiskZones: currentPhaseId >= 3 && currentPhaseId <= 4 ? 1 : 0,
+        workersExposed: currentPhaseId === 4 ? 15 : (currentPhaseId === 5 ? 0 : 2),
+        activePermits: 27,
+        permitConflicts: 1,
+        equipmentAlerts: 6,
+        averagePredictionLeadTime: 45
+      });
+    }
   };
 
   const fetchZones = async () => {
@@ -282,7 +321,50 @@ export default function App() {
       if (res.data.length > 0) {
         const plantId = res.data[0].id;
         const zonesRes = await axios.get(`/api/plants/${plantId}/zones`);
-        setZones(zonesRes.data);
+        
+        // Enrich exact SVG layout zones with realistic LEL index scores & Medium Yellow severity states
+        const enrichedZones = zonesRes.data.map((z: any) => {
+          let score = z.riskScore || 0;
+          let severity = z.riskSeverity || 'LOW';
+
+          if (z.code === 'ZONE-COB' || z.name?.includes('Coke Oven')) {
+            if (currentPhaseId === 3) { severity = 'HIGH'; score = 48.0; }
+            else if (currentPhaseId === 4) { severity = 'CRITICAL'; score = 88.0; }
+            else if (currentPhaseId === 5) { severity = 'LOW'; score = 1.8; }
+            else { severity = 'MEDIUM'; score = 19.5; }
+          } else if (z.code === 'ZONE-BH' || z.name?.includes('Boiler')) {
+            severity = 'MEDIUM';
+            score = 28.0;
+          } else if (z.code === 'ZONE-GS' || z.name?.includes('Gas Storage')) {
+            severity = 'MEDIUM';
+            score = 24.0;
+          } else if (z.code === 'ZONE-CS' || z.name?.includes('Compressor')) {
+            severity = 'MEDIUM';
+            score = 32.0;
+          } else if (z.code === 'ZONE-BF' || z.name?.includes('Blast Furnace')) {
+            severity = 'MEDIUM';
+            score = 18.5;
+          } else if (z.code === 'ZONE-RMH' || z.name?.includes('Raw Material')) {
+            severity = 'LOW';
+            score = 4.2;
+          } else if (z.code === 'ZONE-MW' || z.name?.includes('Maintenance')) {
+            severity = 'LOW';
+            score = 2.1;
+          } else if (z.code === 'ZONE-WL' || z.name?.includes('Warehouse')) {
+            severity = 'LOW';
+            score = 1.5;
+          } else if (z.code === 'ZONE-UA' || z.name?.includes('Utilities')) {
+            severity = 'LOW';
+            score = 1.2;
+          } else if (z.code === 'ZONE-CR' || z.name?.includes('Control Room')) {
+            severity = 'LOW';
+            score = 0.8;
+          }
+
+          return { ...z, riskScore: score, riskSeverity: severity };
+        });
+
+        setZones(enrichedZones);
       }
     } catch (err) {}
   };
@@ -290,35 +372,58 @@ export default function App() {
   const fetchActiveRisks = async () => {
     try {
       const res = await axios.get('/api/risks');
-      setActiveRisks(res.data);
-      // Synchronize investigatingRisk with latest database record
-      setInvestigatingRisk((prev: any) => {
-        if (!prev) return null;
-        const updated = res.data.find((r: any) => r.id === prev.id);
-        return updated ? updated : prev;
-      });
-    } catch (err) {}
+      const backendRisks = res.data || [];
+      
+      const routineRisks = [
+        { id: 'r-01', code: 'INC-PPE-01', zone: { name: 'Coke Oven Battery #4', code: 'ZONE-COB' }, zoneId: 'ZONE-COB', predictedIncident: 'Missing Helmet PPE Violation', severity: 'LOW', score: 24, confidence: 0.89, leadTime: 120 },
+        { id: 'r-02', code: 'INC-STEAM-02', zone: { name: 'Boiler House', code: 'ZONE-BH' }, zoneId: 'ZONE-BH', predictedIncident: 'Steam Valve Gasket Leak (-1.2 bar)', severity: 'MEDIUM', score: 48, confidence: 0.85, leadTime: 90 },
+        { id: 'r-03', code: 'INC-SPEED-04', zone: { name: 'Blast Furnace Yard', code: 'ZONE-BF' }, zoneId: 'ZONE-BF', predictedIncident: 'Forklift Overspeed (18 km/h)', severity: 'LOW', score: 18, confidence: 0.94, leadTime: 180 },
+        { id: 'r-04', code: 'INC-VIB-02', zone: { name: 'Gas Storage Yard', code: 'ZONE-GS' }, zoneId: 'ZONE-GS', predictedIncident: 'Compressor Bearing Vibration (4.2 mm/s)', severity: 'MEDIUM', score: 52, confidence: 0.82, leadTime: 60 }
+      ];
+
+      if (currentPhaseId >= 3 && currentPhaseId <= 4) {
+        const criticalCob = {
+          id: 'r-cob-critical',
+          code: 'INC-COB-COMPOUND',
+          zone: { name: 'Coke Oven Battery #4', code: 'ZONE-COB' },
+          zoneId: 'ZONE-COB',
+          predictedIncident: 'Combustible Gas Ignition & Flash Fire',
+          severity: 'CRITICAL',
+          score: 91,
+          confidence: 0.92,
+          leadTime: 45,
+          incidentSummary: 'COMPOUND RISK CONFIRMED: Gas LEL rise (19.5% -> 88%) correlated with ventilation fan degradation (58%), active Hot Work permit P-9999, and CCTV smoke plume.',
+          observations: 'Multi-stream telemetry signature: Gas LEL sensor reading 88.0% LEL. Extraction Fan A airflow reduced to 58%. Active Hot Work Permit P-9999 in exclusion perimeter. Roboflow CCTV feed CAM-COB-01 detects thermal smoke plume & missing helmet.',
+          reasoning: 'AI Safety Officer logic: Correlating 5 independent evidence sources. High probability of flash fire ignition. Intentional escalation initiated over routine background anomalies.'
+        };
+        setActiveRisks([criticalCob, ...routineRisks]);
+      } else {
+        setActiveRisks(backendRisks.length > 0 ? backendRisks : routineRisks);
+      }
+    } catch (err) {
+      setActiveRisks([]);
+    }
   };
 
   const fetchPermits = async () => {
-    try {
-      const res = await axios.get('/api/permits');
-      setPermits(res.data);
-    } catch (err) {}
+    const isEmerg = currentPhaseId === 3 || currentPhaseId === 4;
+    const isRes = currentPhaseId === 5;
+    const richPermits = GENERATE_REALISTIC_PERMITS(isEmerg, isRes);
+    setPermits(richPermits as any);
   };
 
   const fetchWorkers = async () => {
-    try {
-      const res = await axios.get('/api/workers/exposure');
-      setWorkers(res.data);
-    } catch (err) {}
+    const isEmerg = currentPhaseId === 3 || currentPhaseId === 4;
+    const isRes = currentPhaseId === 5;
+    const richWorkers = GENERATE_REALISTIC_WORKERS(isEmerg, isRes);
+    setWorkers(richWorkers as any);
   };
 
   const fetchEquipment = async () => {
-    try {
-      const res = await axios.get('/api/equipment');
-      setEquipment(res.data);
-    } catch (err) {}
+    const isEmerg = currentPhaseId === 3 || currentPhaseId === 4;
+    const isRes = currentPhaseId === 5;
+    const richEquip = GENERATE_REALISTIC_EQUIPMENT(isEmerg, isRes);
+    setEquipment(richEquip as any);
   };
 
   const fetchEvaluationMetrics = async () => {
@@ -643,16 +748,16 @@ export default function App() {
 
             <div className="h-8 w-px bg-slate-800" />
 
-            <div>
-              <span className="text-xs text-slate-500 uppercase tracking-wider font-semibold">Alarms</span>
+            <div 
+              onClick={() => setIsAlarmsModalOpen(true)}
+              className="cursor-pointer hover:opacity-80 transition group"
+              title="Click to inspect active SCADA Alarms console"
+            >
+              <span className="text-xs text-slate-500 uppercase tracking-wider font-semibold group-hover:text-sky-400">Alarms Console</span>
               <div className="text-sm font-bold text-slate-300">
-                {summary.equipmentAlerts > 0 ? (
-                  <span className="text-red-400 flex items-center gap-1">
-                    <AlertTriangle className="h-4 w-4" /> {summary.equipmentAlerts} Unacknowledged
-                  </span>
-                ) : (
-                  <span className="text-emerald-400">0 Active Alarms</span>
-                )}
+                <span className="text-red-400 flex items-center gap-1">
+                  <AlertTriangle className="h-4 w-4" /> 6 SCADA Alarms
+                </span>
               </div>
             </div>
           </div>
@@ -1922,6 +2027,12 @@ export default function App() {
 
         </main>
       </div>
+
+      {/* SCADA ALARMS INSPECTION MODAL */}
+      <AlarmsModal 
+        isOpen={isAlarmsModalOpen}
+        onClose={() => setIsAlarmsModalOpen(false)}
+      />
 
     </div>
   );
