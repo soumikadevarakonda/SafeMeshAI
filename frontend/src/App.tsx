@@ -660,10 +660,23 @@ export default function App() {
           {/* SIMULATION CONTROLS */}
           <div className="flex items-center gap-3 bg-slate-950 p-1.5 rounded-lg border border-slate-800">
             <span className="text-xs text-slate-400 px-2 font-medium">Scenario Simulation</span>
+            {/* MASTER PLANT STATUS BADGE */}
+            <div className="flex items-center gap-2 border-r border-slate-800 pr-4">
+              <span className={`px-2.5 py-1 rounded text-xs font-mono font-extrabold flex items-center gap-1.5 ${
+                summary.activeCriticalRisks > 0 || simStep >= 50
+                  ? 'bg-red-500/20 text-red-400 border border-red-500/40 animate-pulse'
+                  : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40'
+              }`}>
+                <span className={`h-2 w-2 rounded-full ${summary.activeCriticalRisks > 0 || simStep >= 50 ? 'bg-red-500 animate-ping' : 'bg-emerald-400'}`} />
+                {summary.activeCriticalRisks > 0 || simStep >= 50 ? 'PLANT STATUS: CRITICAL ESCALATION' : 'PLANT STATUS: NOMINAL'}
+              </span>
+              <span className="text-xs font-mono text-slate-500">SHIFT-A</span>
+            </div>
+
             {simStatus === 'IDLE' && (
               <button 
                 onClick={startSimulation}
-                className="flex items-center gap-1 px-3 py-1 bg-sky-600 hover:bg-sky-500 text-white rounded text-xs font-semibold transition"
+                className="flex items-center gap-1.5 px-3 py-1 bg-sky-600 hover:bg-sky-500 text-white rounded text-xs font-bold transition shadow-lg shadow-sky-600/20"
               >
                 <Play className="h-3.5 w-3.5" /> Start Demo
               </button>
@@ -710,30 +723,46 @@ export default function App() {
           {currentPage === 'dashboard' && (
             <div className="space-y-8">
               
-              {/* HIGH IMPACT CRITICAL INCIDENT BANNER */}
+              {/* HIGH IMPACT CRITICAL INCIDENT BANNER (ISA-101 HMI CONTROL BLOCK) */}
               {(summary.activeCriticalRisks > 0 || simStep >= 50) && (
-                <div className="rounded-xl border-2 border-red-500 bg-red-500/10 p-6 shadow-xl shadow-red-500/10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-                  <div className="flex items-start gap-4">
-                    <div className="p-3 rounded-xl bg-red-500 text-white shrink-0 mt-0.5 shadow-lg shadow-red-500/30">
+                <div className="rounded-xl border-2 border-red-500 bg-red-500/10 p-5 shadow-xl shadow-red-500/10 grid grid-cols-1 lg:grid-cols-4 gap-6 items-center">
+                  {/* Col 1: Threat Index & Metric */}
+                  <div className="flex items-center gap-4">
+                    <div className="p-3 rounded-xl bg-red-600 text-white shrink-0 shadow-lg shadow-red-600/30">
                       <ShieldAlert className="h-7 w-7 animate-bounce" />
                     </div>
                     <div>
-                      <div className="flex items-center gap-2">
-                        <span className="px-2 py-0.5 rounded bg-red-500 text-white font-extrabold text-[10px] tracking-wider uppercase font-mono animate-pulse">
-                          CRITICAL RISK ESCALATION DETECTED
-                        </span>
-                        <span className="text-xs text-red-300 font-mono">Zone: ZONE-COB (Coke Oven Battery #4)</span>
-                      </div>
-                      <h3 className="text-lg font-extrabold text-white mt-1">
-                        Combustible Gas Ignition & Flash Fire Threat (Risk Index: 88%)
-                      </h3>
-                      <p className="text-xs text-red-200/90 mt-1 max-w-2xl leading-relaxed">
-                        <strong>Fused Multi-Channel Evidence:</strong> Combustible Gas (19.5% LEL) + Extraction Flow Drop (58%) + Active Hot Work Permit (P-9999) + <strong>Roboflow CCTV Optical Evidence (Smoke & PPE Violation)</strong>.
-                      </p>
+                      <span className="px-2 py-0.5 rounded bg-red-600 text-white font-extrabold text-[9px] tracking-wider uppercase font-mono animate-pulse">
+                        CRITICAL ESCALATION
+                      </span>
+                      <h3 className="text-2xl font-extrabold text-white mt-0.5">88% LEL</h3>
+                      <p className="text-[10px] text-red-300 font-mono font-bold">ZONE-COB • Coke Oven Battery #4</p>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-3 shrink-0">
+                  {/* Col 2: Evidence Pills (Instant Scannability) */}
+                  <div className="lg:col-span-2 space-y-2">
+                    <h4 className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+                      Combustible Gas Ignition & Flash Fire Threat
+                    </h4>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="px-2.5 py-1 rounded bg-slate-950 border border-red-500/50 text-red-300 text-xs font-mono font-bold">
+                        GAS: 19.5% LEL (+0.45%/m)
+                      </span>
+                      <span className="px-2.5 py-1 rounded bg-slate-950 border border-amber-500/50 text-amber-300 text-xs font-mono font-bold">
+                        FAN: 58% FLOW (DEGRADED)
+                      </span>
+                      <span className="px-2.5 py-1 rounded bg-slate-950 border border-red-500/50 text-red-300 text-xs font-mono font-bold">
+                        PERMIT: P-9999 HOT WORK
+                      </span>
+                      <span className="px-2.5 py-1 rounded bg-slate-950 border border-sky-500/50 text-sky-300 text-xs font-mono font-bold">
+                        CCTV: SMOKE & NO HELMET
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Col 3: Primary Action CTA */}
+                  <div className="flex items-center justify-end">
                     <button
                       onClick={() => {
                         const activeCob = activeRisks.find((r: any) => r.zoneId?.includes('COB') || r.predictedIncident?.includes('Gas'));
@@ -743,9 +772,9 @@ export default function App() {
                           setCurrentPage('risks');
                         }
                       }}
-                      className="px-4 py-2.5 rounded-lg bg-red-600 hover:bg-red-500 text-white text-xs font-extrabold uppercase tracking-wider transition shadow-lg shadow-red-600/30 flex items-center gap-2"
+                      className="w-full lg:w-auto px-5 py-3 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-extrabold uppercase tracking-wider transition shadow-lg shadow-red-600/40 flex items-center justify-center gap-2 animate-pulse"
                     >
-                      <Zap className="h-4 w-4" /> Investigate & Dispatch Solution
+                      <Zap className="h-4 w-4" /> DISPATCH CONTAINMENT
                     </button>
                   </div>
                 </div>
@@ -1026,22 +1055,35 @@ export default function App() {
                             rx="6"
                             className="transition duration-300 group-hover:fill-sky-500/10 group-hover:stroke-sky-400"
                           />
+                          {/* ISA-101 Permanent High-Contrast Zone Code Badge Header */}
+                          <rect
+                            x={x + 10} y={y + 10} width={w - 20} height="22"
+                            fill="rgba(15, 23, 42, 0.85)" stroke={stroke} strokeWidth="1"
+                            rx="4"
+                          />
                           <text 
-                            x={x + 15} y={y + 30} 
-                            className="fill-slate-300 font-bold text-xs group-hover:fill-white transition"
+                            x={x + 16} y={y + 25} 
+                            className="fill-white font-extrabold text-xs tracking-wide group-hover:fill-sky-300 transition"
                           >
                             {zone.name}
                           </text>
+
+                          {/* Zone Code Pill */}
                           <text 
                             x={x + 15} y={y + 50} 
-                            className="fill-slate-500 font-mono text-[10px]"
+                            className="fill-sky-400 font-mono font-bold text-[10px]"
                           >
-                            {zone.code}
+                            {zone.code} • ATEX ZONE 1
                           </text>
 
-                          {/* Status Indicators */}
-                          <text x={x + 15} y={y + h - 15} className="fill-slate-400 text-[10px]">
-                            Score: <tspan className="font-bold fill-white">{zone.riskScore?.toFixed(0)}</tspan>
+                          {/* Live Risk Index Badge */}
+                          <rect
+                            x={x + 12} y={y + h - 28} width="95" height="18"
+                            fill={zone.riskSeverity === 'CRITICAL' ? '#ef4444' : '#1e293b'}
+                            rx="3"
+                          />
+                          <text x={x + 18} y={y + h - 15} className="fill-white text-[10px] font-mono font-extrabold">
+                            LEL INDEX: {zone.riskScore?.toFixed(0)}%
                           </text>
                         </g>
                       );
@@ -1534,7 +1576,29 @@ export default function App() {
                     )}
                   </div>
 
-                  <form onSubmit={submitCopilotQuery} className="p-4 border-t border-slate-800 bg-slate-950/60 flex gap-3">
+                  {/* ONE-CLICK PRESET DIAGNOSTIC CHIPS (HMI EFFORT REDUCTION) */}
+                  <div className="px-4 pt-3 pb-1 border-t border-slate-800 bg-slate-950 flex flex-wrap gap-2">
+                    <span className="text-[10px] uppercase font-bold text-slate-500 py-1 font-mono">QUICK DIAGNOSTIC:</span>
+                    {[
+                      "SOP-COB-01 Hot Work Constraints",
+                      "OISD-STD-137 Flammable Gas Limits",
+                      "Evacuation Protocol for ZONE-COB",
+                      "Worker Exposure Limits Check"
+                    ].map((chip, cIdx) => (
+                      <button
+                        key={cIdx}
+                        type="button"
+                        onClick={() => {
+                          setQuery(chip);
+                        }}
+                        className="px-2.5 py-1 rounded bg-slate-900 hover:bg-sky-950 border border-slate-800 hover:border-sky-500/50 text-sky-400 text-xs font-mono transition"
+                      >
+                        ⚡ {chip}
+                      </button>
+                    ))}
+                  </div>
+
+                  <form onSubmit={submitCopilotQuery} className="p-4 border-t border-slate-800/50 bg-slate-950/60 flex gap-3">
                     <input
                       type="text"
                       value={query}
@@ -1545,7 +1609,7 @@ export default function App() {
                     <button
                       type="submit"
                       disabled={copilotLoading}
-                      className="px-6 bg-sky-600 hover:bg-sky-500 disabled:bg-slate-800 text-white font-bold rounded-lg text-sm transition"
+                      className="px-6 bg-sky-600 hover:bg-sky-500 disabled:bg-slate-800 text-white font-bold rounded-lg text-sm transition shadow-lg shadow-sky-600/20"
                     >
                       Send Query
                     </button>

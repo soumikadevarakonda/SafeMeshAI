@@ -302,10 +302,16 @@ export const VisionHub: React.FC<VisionHubProps> = ({
 
                   </div>
                 ) : (
-                  <div className="text-center text-slate-600 space-y-2">
-                    <CheckCircle2 className="h-12 w-12 mx-auto text-slate-700" />
-                    <p className="text-sm font-semibold text-slate-400">Sector Feed Clear</p>
-                    <p className="text-xs text-slate-600">No optical safety hazards or PPE violations detected.</p>
+                  <div className="w-full h-full relative flex items-center justify-center">
+                    {/* Animated Optical Radar Grid Background */}
+                    <div className="absolute inset-0 bg-[linear-gradient(to_bottom,transparent_0%,rgba(16,185,129,0.08)_50%,transparent_100%)] bg-[length:100%_200%] animate-pulse" />
+                    <div className="text-center text-slate-500 space-y-2 relative z-10 bg-slate-950/85 p-5 rounded-xl border border-emerald-500/20 shadow-lg shadow-emerald-500/5">
+                      <CheckCircle2 className="h-9 w-9 mx-auto text-emerald-400" />
+                      <div>
+                        <p className="text-xs font-mono font-extrabold text-emerald-400 uppercase tracking-wider">NOMINAL OPTICAL SCANNING ACTIVE</p>
+                        <p className="text-[10px] text-slate-400 font-mono mt-1">YOLOv8 Frame #10482 • 0 Hazards Detected</p>
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>
