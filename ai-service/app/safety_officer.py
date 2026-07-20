@@ -95,7 +95,8 @@ class OperationalIntelligence:
             "evidence": evidence,
             "is_risky": is_risky,
             "has_hot_work": bool(has_hot_work),
-            "has_confined": bool(has_confined)
+            "has_confined": bool(has_confined),
+            "worker_count": worker_count
         }
 
 

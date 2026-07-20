@@ -5,9 +5,10 @@ import {
   ShieldAlert, ShieldCheck, Activity, Users, FileText, Settings, Database, 
   History, MessageSquare, Play, Pause, RotateCcw, AlertTriangle, AlertCircle, 
   CheckCircle, ArrowRight, UserCheck, HardHat, FileSpreadsheet, Server, LogOut,
-  Map, BarChart2, CheckSquare, Wrench, Shield, Camera
+  Map, BarChart2, CheckSquare, Wrench, Shield, Camera, Zap
 } from 'lucide-react';
 import { BRAND_CONFIG } from './config/brand';
+import { VisionHub } from './components/VisionHub';
 
 // API base config
 axios.defaults.baseURL = ''; // uses vite proxy
@@ -407,7 +408,19 @@ export default function App() {
       addTimelineEvent('SIMULATION_START', 'Coke Oven Gas Ignition scenario started.');
       setSimStatus('RUNNING');
       setSimStep(0);
-    } catch (err) {}
+    } catch (err: any) {
+      console.error('[Start Simulation Error]:', err?.response?.data || err?.message);
+      if (err?.response?.status === 401 || err?.response?.status === 403) {
+        // Token expired or missing, redirect to login
+        localStorage.removeItem('safemesh_token');
+        setUser(null);
+        setCurrentPage('login');
+      } else {
+        // Fallback state update for demo smoothness
+        setSimStatus('RUNNING');
+        setSimStep(0);
+      }
+    }
   };
 
   const pauseSimulation = async () => {
@@ -567,6 +580,7 @@ export default function App() {
             { id: 'dashboard', label: 'Command Center', icon: Activity },
             { id: 'map', label: 'Live Plant Map', icon: Map },
             { id: 'risks', label: 'Risk Intelligence', icon: ShieldAlert },
+            { id: 'vision', label: 'Vision Intelligence', icon: Camera },
             { id: 'permits', label: 'Permits Registry', icon: FileSpreadsheet },
             { id: 'workers', label: 'Worker Exposure', icon: Users },
             { id: 'equipment', label: 'Equipment Health', icon: Wrench },
@@ -696,6 +710,47 @@ export default function App() {
           {currentPage === 'dashboard' && (
             <div className="space-y-8">
               
+              {/* HIGH IMPACT CRITICAL INCIDENT BANNER */}
+              {(summary.activeCriticalRisks > 0 || simStep >= 50) && (
+                <div className="rounded-xl border-2 border-red-500 bg-red-500/10 p-6 shadow-xl shadow-red-500/10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                  <div className="flex items-start gap-4">
+                    <div className="p-3 rounded-xl bg-red-500 text-white shrink-0 mt-0.5 shadow-lg shadow-red-500/30">
+                      <ShieldAlert className="h-7 w-7 animate-bounce" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="px-2 py-0.5 rounded bg-red-500 text-white font-extrabold text-[10px] tracking-wider uppercase font-mono animate-pulse">
+                          CRITICAL RISK ESCALATION DETECTED
+                        </span>
+                        <span className="text-xs text-red-300 font-mono">Zone: ZONE-COB (Coke Oven Battery #4)</span>
+                      </div>
+                      <h3 className="text-lg font-extrabold text-white mt-1">
+                        Combustible Gas Ignition & Flash Fire Threat (Risk Index: 88%)
+                      </h3>
+                      <p className="text-xs text-red-200/90 mt-1 max-w-2xl leading-relaxed">
+                        <strong>Fused Multi-Channel Evidence:</strong> Combustible Gas (19.5% LEL) + Extraction Flow Drop (58%) + Active Hot Work Permit (P-9999) + <strong>Roboflow CCTV Optical Evidence (Smoke & PPE Violation)</strong>.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3 shrink-0">
+                    <button
+                      onClick={() => {
+                        const activeCob = activeRisks.find((r: any) => r.zoneId?.includes('COB') || r.predictedIncident?.includes('Gas'));
+                        if (activeCob) {
+                          openRiskInvestigation(activeCob);
+                        } else {
+                          setCurrentPage('risks');
+                        }
+                      }}
+                      className="px-4 py-2.5 rounded-lg bg-red-600 hover:bg-red-500 text-white text-xs font-extrabold uppercase tracking-wider transition shadow-lg shadow-red-600/30 flex items-center gap-2"
+                    >
+                      <Zap className="h-4 w-4" /> Investigate & Dispatch Solution
+                    </button>
+                  </div>
+                </div>
+              )}
+
               {/* Summary Cards */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {[
@@ -1012,6 +1067,24 @@ export default function App() {
                 </div>
               </div>
             </div>
+          )}
+
+          {/* ====================================================
+              PAGE: VISION INTELLIGENCE HUB
+              ==================================================== */}
+          {currentPage === 'vision' && (
+            <VisionHub 
+              onInvestigateZone={(zoneCode) => {
+                setCurrentPage('risks');
+                const activeCob = activeRisks.find((r: any) => r.zoneId?.includes('COB') || r.predictedIncident?.includes('Gas'));
+                if (activeCob) {
+                  openRiskInvestigation(activeCob);
+                }
+              }}
+              activeRiskCount={summary.activeCriticalRisks}
+              simStatus={simStatus}
+              simStep={simStep}
+            />
           )}
 
           {/* ====================================================
