@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "evaluated_at": "2026-07-20T11:31:42.522015",
+    "evaluated_at": "2026-07-20T21:55:19.263182",
     "test_set_size": 1561,
     "decision_threshold": 0.8,
     "split_type": "scenario_group_holdout",
