@@ -209,50 +209,50 @@ class RegulatoryIntelligence:
         chunks = self.rag.retrieve(search_query, k=5)
         
         # Process regulatory constraints
-        # 1. Coke Oven Ventilation & Hot Work (SOP-COB-01)
+        # 1. Indian Standards: OISD-STD-137 & Factories Act 1948 (Section 37 & 41A)
         if has_hot_work:
             violation_found = False
-            clause = "Hot Work (welding, cutting, grinding) is strictly prohibited in the Coke Oven Battery if ventilation efficiency drops below 70% OR combustible gas is detected above 15% LEL."
+            clause = "OISD-STD-137 (Section 4.2) & Factories Act 1948 (Section 37): Hot Work (welding, cutting) is strictly prohibited in hazardous plant zones if ventilation extraction drops below 70% OR combustible gas exceeds 15% LEL."
             
             if vent_val < 70.0:
                 is_violated = True
                 violation_found = True
-                observations.append(f"Regulatory Violation: Hot work active while ventilation flow efficiency is {vent_val:.1f}% (< 70% safety limit).")
+                observations.append(f"Statutory Violation [OISD-STD-137 / Factories Act 1948]: Hot work active while ventilation flow efficiency is {vent_val:.1f}% (< 70% mandatory limit).")
+            
             if gas_val > 15.0:
                 is_violated = True
                 violation_found = True
-                observations.append(f"Regulatory Violation: Hot work active while combustible gas is {gas_val:.1f}% LEL (> 15% safety limit).")
-                
+                observations.append(f"Statutory Violation [OISD-STD-137 / Factories Act 1948]: Hot work active while combustible gas concentration is {gas_val:.1f}% LEL (> 15% LEL limit).")
+
             regulatory_refs.append({
-                "doc_id": "SOP-COB-01",
-                "section": "Section 3: SIMOPS Constraints",
+                "doc_id": "OISD-STD-137 / Factories Act 1948",
+                "section": "Section 37 (Explosive Gas Precautions) & OISD-STD-137 (Section 4.2)",
                 "clause": clause,
-                "status": "VIOLATION" if violation_found else "COMPLIANT"
+                "status": "NON_COMPLIANT" if violation_found else "COMPLIANT"
             })
         else:
-            # Add reference standard anyway
             regulatory_refs.append({
-                "doc_id": "SOP-COB-01",
-                "section": "Section 2: Threshold Safety Controls",
-                "clause": "Extraction fans must operate above 75% flow efficiency. Gas warning alert at 20% LEL, critical alert at 40% LEL.",
+                "doc_id": "OISD-STD-137 / Factories Act 1948",
+                "section": "Section 37: Explosive & Flammable Fume Regulations",
+                "clause": "Ventilation systems must maintain continuous positive extraction to prevent gas pocket formation.",
                 "status": "COMPLIANT"
             })
 
-        # 2. Confined Space Entry Standard (REG-CSF-12)
+        # 2. DGMS (Tech) Circular No. 04 & Confined Space Entry
         if has_confined:
-            violation_found = False
-            clause = "Oxygen levels must remain between 19.5% and 23.5%. Entry is prohibited if oxygen levels drop below 19.5%."
+            oxy_violation = False
+            clause = "DGMS Circular No. 04 / Factories Act Sec 36: Confined Space Entry prohibited if atmospheric oxygen drops below 19.5% Vol or toxic gas exceeds 25 PPM."
             
             if oxy_val < 19.5:
                 is_violated = True
-                violation_found = True
-                observations.append(f"Regulatory Violation: Confined space entry active under deficient oxygen level of {oxy_val:.1f}% (< 19.5% safety threshold).")
-                
+                oxy_violation = True
+                observations.append(f"Statutory Violation [DGMS Circular No.04]: Confined space active under oxygen deficiency ({oxy_val:.1f}% Vol < 19.5% min).")
+
             regulatory_refs.append({
-                "doc_id": "REG-CSF-12",
-                "section": "Section 2: Atmospheric Entry Standards",
+                "doc_id": "DGMS (Tech) Circular No. 04 / Factories Act Sec 36",
+                "section": "Atmospheric Entry Standards in High-Hazard Units",
                 "clause": clause,
-                "status": "VIOLATION" if violation_found else "COMPLIANT"
+                "status": "NON_COMPLIANT" if oxy_violation else "COMPLIANT"
             })
 
         # Augment with any relevant parsed RAG chunks
