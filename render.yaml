@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: safemesh-ai
+    env: docker
+    dockerfilePath: ./Dockerfile
+    region: singapore
+    plan: starter
+    healthCheckPath: /health
+    envVars:
+      - key: PORT
+        value: 5000
+      - key: NODE_ENV
+        value: production
+      - key: JWT_SECRET
+        generateValue: true
+      - key: ROBOFLOW_API_KEY
+        sync: false
+    disk:
+      name: safemesh-db-disk
+      mountPath: /app/backend/prisma
+      sizeGB: 1

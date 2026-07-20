@@ -27,10 +27,10 @@ const io = new socket_io_1.Server(server, {
     }
 });
 // Middleware
-app.use((0, helmet_1.default)());
+app.use((0, helmet_1.default)({ contentSecurityPolicy: false }));
 app.use((0, cors_1.default)({ origin: '*' }));
 app.use(express_1.default.json());
-// Rate Limiter: 100 requests per minute
+// Rate Limiter: 150 requests per minute
 const limiter = (0, express_rate_limit_1.default)({
     windowMs: 60 * 1000,
     max: 150,
@@ -50,6 +50,19 @@ app.get('/health', (req, res) => {
 });
 // Setup Router
 app.use('/api', (0, routes_1.default)(io));
+// Static Asset Serving for Production Single-Port Deployments
+const fs = require('fs');
+const path = require('path');
+const frontendDistPath = path.join(__dirname, '../../frontend/dist');
+if (fs.existsSync(frontendDistPath)) {
+    logger.info(`Serving static frontend dist from ${frontendDistPath}`);
+    app.use(express_1.default.static(frontendDistPath));
+    app.get('*', (req, res, next) => {
+        if (req.url.startsWith('/api') || req.url.startsWith('/health'))
+            return next();
+        res.sendFile(path.join(frontendDistPath, 'index.html'));
+    });
+}
 // Socket.IO namespace actions
 io.on('connection', (socket) => {
     logger.info({ socketId: socket.id }, 'Socket.IO client connected');

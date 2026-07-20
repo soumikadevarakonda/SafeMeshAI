@@ -26,11 +26,11 @@ const io = new Server(server, {
 });
 
 // Middleware
-app.use(helmet());
+app.use(helmet({ contentSecurityPolicy: false }));
 app.use(cors({ origin: '*' }));
 app.use(express.json());
 
-// Rate Limiter: 100 requests per minute
+// Rate Limiter: 150 requests per minute
 const limiter = rateLimit({
   windowMs: 60 * 1000,
   max: 150,
@@ -53,6 +53,20 @@ app.get('/health', (req, res) => {
 
 // Setup Router
 app.use('/api', setupRouter(io));
+
+// Static Asset Serving for Production Single-Port Deployments
+const fs = require('fs');
+const path = require('path');
+const frontendDistPath = path.join(__dirname, '../../frontend/dist');
+
+if (fs.existsSync(frontendDistPath)) {
+  logger.info(`Serving static frontend dist from ${frontendDistPath}`);
+  app.use(express.static(frontendDistPath));
+  app.get('*', (req, res, next) => {
+    if (req.url.startsWith('/api') || req.url.startsWith('/health')) return next();
+    res.sendFile(path.join(frontendDistPath, 'index.html'));
+  });
+}
 
 // Socket.IO namespace actions
 io.on('connection', (socket) => {

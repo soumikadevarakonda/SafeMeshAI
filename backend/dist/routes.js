@@ -109,6 +109,10 @@ function authorizeRoles(...roles) {
 // SETUP ROUTER
 // ----------------------------------------------------
 function setupRouter(io) {
+    // Sync simulation status on socket connection
+    io.on('connection', (socket) => {
+        socket.emit('simulation:status', { status: simulation_1.simState.status, step: simulation_1.simState.step });
+    });
     // ----------------------------------------------------
     // AUTH
     // ----------------------------------------------------
@@ -141,7 +145,18 @@ function setupRouter(io) {
             const activeRisksCount = await prisma.riskEvent.count({ where: { status: 'ACTIVE', severity: { in: ['HIGH', 'CRITICAL'] } } });
             const criticalZonesCount = await prisma.zone.count({ where: { riskSeverity: 'CRITICAL' } });
             const activePermits = await prisma.permit.count({ where: { status: 'ACTIVE' } });
-            const workersExposed = await prisma.worker.count({ where: { status: 'HAZARD_EXPOSURE' } });
+            const workersExposed = await prisma.worker.count({
+                where: {
+                    currentZone: {
+                        riskSeverity: {
+                            in: ['HIGH', 'CRITICAL']
+                        }
+                    },
+                    status: {
+                        in: ['ON_DUTY', 'HAZARD_EXPOSURE']
+                    }
+                }
+            });
             const warningLeadTimes = await prisma.riskEvent.findMany({ select: { leadTime: true } });
             const avgLeadTime = warningLeadTimes.length
                 ? warningLeadTimes.reduce((acc, curr) => acc + curr.leadTime, 0) / warningLeadTimes.length
@@ -319,10 +334,22 @@ function setupRouter(io) {
         res.json(await prisma.riskEventEvidence.findMany({ where: { riskEventId: req.params.riskId } }));
     });
     router.get('/risks/:riskId/similar-incidents', authenticateToken, async (req, res) => {
-        res.json([
-            { title: "Coke Oven Gas Flash Fire (2024)", severity: "MAJOR", date: "2024-04-12", cause: "Welding spark ignited pocket of CO gas. Exhaust fan extraction was degraded." },
-            { title: "Ventilation Degraded Exhaust Shut-Off (2025)", severity: "MINOR", date: "2025-09-02", cause: "Ventilation efficiency dropped to 48%, causing gas pockets." }
-        ]);
+        try {
+            const risk = await prisma.riskEvent.findUnique({
+                where: { id: req.params.riskId }
+            });
+            if (risk && risk.similarIncidentsJson) {
+                return res.json(JSON.parse(risk.similarIncidentsJson));
+            }
+            // Fallback to default mock incidents if no safety officer data is written yet
+            res.json([
+                { title: "Coke Oven Gas Flash Fire (2024)", severity: "MAJOR", date: "2024-04-12", cause: "Welding spark ignited pocket of CO gas. Exhaust fan extraction was degraded." },
+                { title: "Ventilation Degraded Exhaust Shut-Off (2025)", severity: "MINOR", date: "2025-09-02", cause: "Ventilation efficiency dropped to 48%, causing gas pockets." }
+            ]);
+        }
+        catch (e) {
+            res.status(500).json({ error: e.message });
+        }
     });
     // ----------------------------------------------------
     // INTERVENTIONS
@@ -345,7 +372,7 @@ function setupRouter(io) {
     router.post('/interventions/:interventionId/execute', authenticateToken, authorizeRoles('SAFETY_OFFICER', 'CONTROL_ROOM_OPERATOR', 'ADMIN'), async (req, res) => {
         const { interventionId } = req.params;
         try {
-            (0, simulation_1.executeInterventionInSimulation)(interventionId, io);
+            await (0, simulation_1.executeInterventionInSimulation)(interventionId, io);
             res.json({ status: 'started', message: 'Intervention execution started' });
         }
         catch (e) {
