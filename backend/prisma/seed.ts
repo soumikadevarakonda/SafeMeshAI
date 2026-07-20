@@ -12,25 +12,25 @@ async function main() {
   const users = [
     {
       email: 'admin@safemesh.ai',
-      name: 'System Admin',
+      name: 'Rajesh Sharma (System Admin)',
       role: 'ADMIN',
       passwordHash,
     },
     {
       email: 'officer@safemesh.ai',
-      name: 'Sarah Jenkins (Safety Officer)',
+      name: 'Sunita Sharma (Safety Officer)',
       role: 'SAFETY_OFFICER',
       passwordHash,
     },
     {
       email: 'operator@safemesh.ai',
-      name: 'John Doe (Control Operator)',
+      name: 'Rajesh Kumar (Control Operator)',
       role: 'CONTROL_ROOM_OPERATOR',
       passwordHash,
     },
     {
       email: 'manager@safemesh.ai',
-      name: 'Marcus Vance (Plant Manager)',
+      name: 'Vikramaditya Rao (Plant Manager)',
       role: 'PLANT_MANAGER',
       passwordHash,
     },
@@ -39,7 +39,7 @@ async function main() {
   for (const u of users) {
     await prisma.user.upsert({
       where: { email: u.email },
-      update: {},
+      update: { name: u.name },
       create: u,
     });
   }
@@ -49,7 +49,7 @@ async function main() {
   const plant = await prisma.plant.create({
     data: {
       name: 'SafeMesh Steel & Coke Processing Plant #4',
-      location: 'Sector 9, Industrial Zone, Gary, Indiana',
+      location: 'Industrial Area, Sector 5, Visakhapatnam, Andhra Pradesh',
     },
   });
   console.log('Plant created:', plant.name);
@@ -86,13 +86,13 @@ async function main() {
 
   // 4. Create Workers
   const workersData = [
-    { name: 'Alex Rivera', badgeNumber: 'WD-001', role: 'Mechanical Technician' },
-    { name: 'Emily Chen', badgeNumber: 'WD-002', role: 'Electrical Engineer' },
-    { name: 'David Mwangi', badgeNumber: 'WD-003', role: 'Operations Supervisor' },
-    { name: 'Carlos Gomez', badgeNumber: 'WD-004', role: 'Safety Inspector' },
-    { name: 'Rachel Green', badgeNumber: 'WD-005', role: 'Ventilation Tech' },
-    { name: 'Sam Wilson', badgeNumber: 'WD-006', role: 'Maintenance Assistant' },
-    { name: 'Lisa Park', badgeNumber: 'WD-007', role: 'Instrumentation Specialist' },
+    { name: 'Arjun Patel', badgeNumber: 'WD-001', role: 'Mechanical Technician' },
+    { name: 'Priya Sharma', badgeNumber: 'WD-002', role: 'Electrical Engineer' },
+    { name: 'Rajesh Kumar', badgeNumber: 'WD-003', role: 'Operations Supervisor' },
+    { name: 'Suresh Verma', badgeNumber: 'WD-004', role: 'Safety Inspector' },
+    { name: 'Ananya Reddy', badgeNumber: 'WD-005', role: 'Ventilation Tech' },
+    { name: 'Vikram Singh', badgeNumber: 'WD-006', role: 'Maintenance Assistant' },
+    { name: 'Deepak Nair', badgeNumber: 'WD-007', role: 'Instrumentation Specialist' },
   ];
 
   const workers: any[] = [];

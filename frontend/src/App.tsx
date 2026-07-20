@@ -340,8 +340,8 @@ export default function App() {
   const fetchAuditLogs = async () => {
     // mock audit log entries for prototype UI
     setAuditLogs([
-      { id: 1, user: 'Sarah Jenkins', action: 'Login', resource: 'Auth', result: 'Success', timestamp: new Date().toLocaleTimeString() },
-      { id: 2, user: 'John Doe', action: 'Override Fan Flow', resource: 'Equipment EQ-COB-EXT-A', result: 'Success', timestamp: new Date().toLocaleTimeString() }
+      { id: 1, user: 'Sunita Sharma', action: 'Login', resource: 'Auth', result: 'Success', timestamp: new Date().toLocaleTimeString() },
+      { id: 2, user: 'Rajesh Kumar', action: 'Override Fan Flow', resource: 'Equipment EQ-COB-EXT-A', result: 'Success', timestamp: new Date().toLocaleTimeString() }
     ]);
   };
 

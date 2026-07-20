@@ -505,7 +505,7 @@ def build_pdf(filename="SafeMesh_AI_Project_Report.pdf"):
 
     geo_features = [
         ("Dynamic Zone Heatmaps", "Plant sectors (`ZONE-COB`, `ZONE-BF`, `ZONE-GS`, `ZONE-BH`) dynamically shift color from Green (Nominal) to Amber (Medium) and Red (Critical) as ML risk indices update."),
-        ("Worker Badge Location Tracking", "Displays real-time worker count and personnel exposure telemetry (e.g. Sarah Jenkins Badge #1042 located on Coke Oven Deck)."),
+        ("Worker Badge Location Tracking", "Displays real-time worker count and personnel exposure telemetry (e.g. Sunita Sharma Badge #1042 located on Coke Oven Deck)."),
         ("Active Permit Overlays", "Superimposes active work permits (`P-9999 Hot Work Welding`) directly over plant coordinates to visually highlight Simultaneous Operations (SIMOPS) conflicts."),
         ("CCTV Camera Viewport Markers", "Positions sector camera feeds (`CAM-COB-01`) on the SVG layout map, enabling single-click inspection of visual hazard bounding boxes.")
     ]
