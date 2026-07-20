@@ -15,6 +15,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--zone", required=True)
     parser.add_argument("--timestamp", required=True)
+    parser.add_argument("--cctv_image", required=False, default=None)
     args = parser.parse_args()
 
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -195,9 +196,9 @@ def main():
         "features": features
     }
 
-    # Run AI Safety Officer Decision Layer
+    # Run AI Safety Officer Decision Layer with Vision Intelligence
     officer = AISafetyOfficer(models_dir)
-    enriched_output = officer.observe_and_decide(args.zone, features, output)
+    enriched_output = officer.observe_and_decide(args.zone, features, output, image_input=args.cctv_image)
 
     print(json.dumps(enriched_output))
 

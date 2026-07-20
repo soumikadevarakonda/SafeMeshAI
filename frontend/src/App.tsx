@@ -5,7 +5,7 @@ import {
   ShieldAlert, ShieldCheck, Activity, Users, FileText, Settings, Database, 
   History, MessageSquare, Play, Pause, RotateCcw, AlertTriangle, AlertCircle, 
   CheckCircle, ArrowRight, UserCheck, HardHat, FileSpreadsheet, Server, LogOut,
-  Map, BarChart2, CheckSquare, Wrench, Shield
+  Map, BarChart2, CheckSquare, Wrench, Shield, Camera
 } from 'lucide-react';
 import { BRAND_CONFIG } from './config/brand';
 
@@ -786,7 +786,7 @@ export default function App() {
                       { name: "Maintenance", status: "Active", active: true },
                       { name: "Past Incidents", status: "Active", active: true },
                       { name: "Regulatory RAG", status: "Active", active: true },
-                      { name: "Vision (CCTV)", status: "Coming Soon", active: false }
+                      { name: "Vision (Roboflow CCTV)", status: "Active (CAM-COB-01)", active: true }
                     ].map((src, idx) => (
                       <div key={idx} className="p-2 rounded bg-slate-950/60 border border-slate-850 flex flex-col justify-between h-11">
                         <div className="flex items-center gap-1 justify-between">
@@ -1160,6 +1160,41 @@ export default function App() {
                         <p className="text-xs text-slate-300 mt-1 leading-relaxed whitespace-pre-line bg-slate-950/60 p-3 rounded border border-slate-850">
                           {investigatingRisk.reasoning || "Compiling logical reasoning trails..."}
                         </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* CCTV Visual Evidence Card */}
+                  <div className="rounded-xl border border-sky-500/30 bg-slate-900 p-6 space-y-4 shadow-lg shadow-sky-500/5">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-sm font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
+                        <Camera className="h-4 w-4 text-sky-400" /> Vision Intelligence (Roboflow CCTV)
+                      </h3>
+                      <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-sky-500/10 text-sky-400 border border-sky-500/30 flex items-center gap-1">
+                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" /> CAM-COB-01 LIVE
+                      </span>
+                    </div>
+
+                    <div className="p-4 rounded-lg bg-slate-950 border border-slate-800 space-y-3">
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="text-slate-400 font-mono">Camera: <strong className="text-white">Coke Oven East Inspection Camera</strong></span>
+                        <span className="text-slate-500">Location: Battery Top Deck</span>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
+                        <div className="p-2.5 rounded bg-slate-900 border border-amber-500/30 flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <AlertTriangle className="h-4 w-4 text-amber-400" />
+                            <span className="text-xs font-bold text-slate-200">Smoke Plume Detected</span>
+                          </div>
+                          <span className="text-xs font-mono font-bold text-amber-400">92% Conf</span>
+                        </div>
+                        <div className="p-2.5 rounded bg-slate-900 border border-red-500/30 flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <ShieldAlert className="h-4 w-4 text-red-400" />
+                            <span className="text-xs font-bold text-slate-200">No Helmet PPE Violation</span>
+                          </div>
+                          <span className="text-xs font-mono font-bold text-red-400">89% Conf</span>
+                        </div>
                       </div>
                     </div>
                   </div>

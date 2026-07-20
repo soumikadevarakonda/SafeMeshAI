@@ -270,11 +270,13 @@ class RegulatoryIntelligence:
         }
 
 
+from app.vision_provider import VisionIntelligence
+
 class DecisionIntelligence:
     """
     Synthesizes reports from all modules and shapes the final Decision Object.
     """
-    def synthesize(self, zone_id, sensor_report, op_report, maint_report, hist_report, reg_report, risk_score, severity, confidence, lead_time, predicted_incident):
+    def synthesize(self, zone_id, sensor_report, op_report, maint_report, hist_report, reg_report, vision_report, risk_score, severity, confidence, lead_time, predicted_incident):
         # 1. Incident Summary
         if severity in ["HIGH", "CRITICAL"]:
             summary = f"Critical safety risk identified in {zone_id}: {predicted_incident} threat with active regulatory violations."
@@ -290,6 +292,17 @@ class DecisionIntelligence:
         all_obs.extend(maint_report["observations"])
         all_obs.extend(hist_report["observations"])
         all_obs.extend(reg_report["observations"])
+        
+        # Add Vision Observations
+        cctv_camera_id = None
+        if vision_report:
+            vision_summary_items = []
+            for obs in vision_report:
+                cctv_camera_id = obs.get("camera", "CAM-COB-01")
+                vision_summary_items.append(f"{obs.get('type')} (Conf: {int(obs.get('confidence', 0)*100)}%)")
+            if vision_summary_items:
+                all_obs.append(f"Visual Evidence ({cctv_camera_id}): Detected {', '.join(vision_summary_items)}.")
+
         observations_str = " ".join(all_obs) if all_obs else "All sector parameters operating within stable, nominal baselines."
 
         # 3. Reasoning trail
@@ -302,6 +315,8 @@ class DecisionIntelligence:
             reasoning_steps.append("3. Mechanical buffer is reduced due to degraded asset health scores or overdue maintenance routines.")
         if reg_report["is_violated"]:
             reasoning_steps.append("4. Immediate action is mandated due to direct violations of documented plant Safety SOPs.")
+        if vision_report:
+            reasoning_steps.append(f"5. Vision Intelligence ({cctv_camera_id or 'CCTV'}): Optical hazard detection confirms visual evidence of sector threat.")
         
         if reasoning_steps:
             reasoning_trail = (
@@ -318,26 +333,24 @@ class DecisionIntelligence:
             if op_report["has_hot_work"]:
                 recommendations.append({
                     "title": "Suspend Hot Work Permit",
-                    "action": "Immediately revoke active Hot Work welding/cutting permits to remove the primary ignition source.",
-                    "priority": "CRITICAL"
+                    "priority": "HIGH",
+                    "action": "Revoke active welding permit and clear ignition sources immediately.",
+                    "mitigationImpact": "Eliminates immediate thermal ignition risk in gas-elevated area."
                 })
-            if any("worker" in o.lower() for o in op_report["observations"]):
+            if sensor_report["is_risky"]:
                 recommendations.append({
-                    "title": "Evacuate Zone",
-                    "action": "Initiate emergency evacuation logs and command all personnel to clear the sector.",
-                    "priority": "CRITICAL"
+                    "title": "Override Auxiliary Extraction Fans",
+                    "priority": "CRITICAL",
+                    "action": "Increase Coke Oven Battery extractor fan speed to 100% manual override.",
+                    "mitigationImpact": "Disperses combustible gas concentrations and restores safe airflow."
                 })
-            if any("ventilation" in o.lower() for o in sensor_report["observations"]):
+            if op_report["worker_count"] > 0:
                 recommendations.append({
-                    "title": "Ventilation Override",
-                    "action": "Override extraction systems to launch auxiliary bypass ventilation and disperse gas pocket.",
-                    "priority": "HIGH"
+                    "title": "Dispatch Sector Evacuation",
+                    "priority": "CRITICAL",
+                    "action": "Sound sector horn and order immediate evacuation of exposed personnel.",
+                    "mitigationImpact": "Prevents worker exposure to flash fire or toxic inhalation hazards."
                 })
-            recommendations.append({
-                "title": "Continuous Atmospheric Readings",
-                "action": "Dispatch safety technician equipped with portable gas monitoring kit to take continuous manual readouts.",
-                "priority": "MEDIUM"
-            })
         else:
             recommendations.append({
                 "title": "Routine Checks",
@@ -351,8 +364,10 @@ class DecisionIntelligence:
             "observations": observations_str,
             "reasoning": reasoning_trail,
             "recommendations": recommendations,
+            "regulatoryReferences": reg_report["regulatoryReferences"],
             "similarIncidents": hist_report["similarIncidents"],
-            "regulatoryReferences": reg_report["regulatoryReferences"]
+            "visionObservations": vision_report,
+            "cctvCameraId": cctv_camera_id
         }
         return decision
 
@@ -368,9 +383,10 @@ class AISafetyOfficer:
         self.maint_intel = MaintenanceIntelligence()
         self.hist_intel = HistoricalIncidentIntelligence()
         self.reg_intel = RegulatoryIntelligence(models_dir)
+        self.vision_intel = VisionIntelligence()
         self.decision_intel = DecisionIntelligence()
 
-    def observe_and_decide(self, zone_id, features, prediction_results):
+    def observe_and_decide(self, zone_id, features, prediction_results, image_input=None):
         """
         Executes reasoning modules and fuses results with prediction engine values.
         """
@@ -387,6 +403,7 @@ class AISafetyOfficer:
         maint_report = self.maint_intel.analyze(features)
         hist_report = self.hist_intel.analyze(zone_id, features)
         reg_report = self.reg_intel.analyze(features)
+        vision_report = self.vision_intel.analyze(zone_id, image_input)
 
         # Synthesize final decision
         decision = self.decision_intel.synthesize(
@@ -396,6 +413,7 @@ class AISafetyOfficer:
             maint_report=maint_report,
             hist_report=hist_report,
             reg_report=reg_report,
+            vision_report=vision_report,
             risk_score=risk_score,
             severity=severity,
             confidence=confidence,
