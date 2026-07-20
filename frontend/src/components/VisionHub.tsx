@@ -384,6 +384,7 @@ export const VisionHub: React.FC<VisionHubProps> = ({
             {
               title: "Fire / Open Flame",
               risk: "CRITICAL",
+              imageSrc: "/hazards/fire.jpg",
               badgeColor: "bg-red-500/20 text-red-400 border-red-500/40",
               borderColor: "border-red-500/30 hover:border-red-500/60 bg-red-500/5",
               desc: "Open thermal ignition or volatile gas flame detected near high-pressure fuel lines.",
@@ -394,6 +395,7 @@ export const VisionHub: React.FC<VisionHubProps> = ({
             {
               title: "Smoke Plume",
               risk: "HIGH",
+              imageSrc: "/hazards/smoke.jpg",
               badgeColor: "bg-amber-500/20 text-amber-400 border-amber-500/40",
               borderColor: "border-amber-500/30 hover:border-amber-500/60 bg-amber-500/5",
               desc: "Dense smoldering exhaust or toxic plume rising from degraded extraction ducts.",
@@ -404,6 +406,7 @@ export const VisionHub: React.FC<VisionHubProps> = ({
             {
               title: "Chemical Hazard",
               risk: "CRITICAL",
+              imageSrc: "/hazards/chemical.jpg",
               badgeColor: "bg-red-500/20 text-red-400 border-red-500/40",
               borderColor: "border-red-500/30 hover:border-red-500/60 bg-red-500/5",
               desc: "Uncontained corrosive fluid pool or solvent container leak in storage sector.",
@@ -414,6 +417,7 @@ export const VisionHub: React.FC<VisionHubProps> = ({
             {
               title: "No Helmet (PPE)",
               risk: "HIGH",
+              imageSrc: "/hazards/no_helmet.jpg",
               badgeColor: "bg-amber-500/20 text-amber-400 border-amber-500/40",
               borderColor: "border-amber-500/30 hover:border-amber-500/60 bg-amber-500/5",
               desc: "Personnel operating inside active Hot Work area without mandatory protective headgear.",
@@ -424,6 +428,7 @@ export const VisionHub: React.FC<VisionHubProps> = ({
             {
               title: "Water Leak",
               risk: "MEDIUM",
+              imageSrc: "/hazards/water_leak.jpg",
               badgeColor: "bg-yellow-500/20 text-yellow-400 border-yellow-500/40",
               borderColor: "border-yellow-500/30 hover:border-yellow-500/60 bg-yellow-500/5",
               desc: "High-pressure coolant line seepage or pipe joint weeping near electrical switchgear.",
@@ -443,19 +448,26 @@ export const VisionHub: React.FC<VisionHubProps> = ({
                     <span className="text-[9px] font-mono text-slate-500">Class {idx + 1}</span>
                   </div>
 
-                  {/* THUMBNAIL VISUAL ANNOTATION BOX */}
-                  <div className="mt-3 aspect-video rounded-lg bg-slate-950 border border-slate-800 relative p-3 flex flex-col justify-between overflow-hidden shadow-inner">
-                    <div className="flex items-center justify-between text-[9px] font-mono text-slate-500 z-10">
-                      <span>Roboflow YOLOV8</span>
-                      <Icon className={`h-3.5 w-3.5 ${item.iconColor}`} />
-                    </div>
+                  {/* THUMBNAIL VISUAL ANNOTATION BOX WITH DUMMY HAZARD IMAGE */}
+                  <div className="mt-3 aspect-video rounded-lg bg-slate-950 border border-slate-800 relative overflow-hidden shadow-inner group">
+                    <img 
+                      src={item.imageSrc} 
+                      alt={item.title} 
+                      className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition duration-300"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/20 to-transparent p-2.5 flex flex-col justify-between">
+                      <div className="flex items-center justify-between text-[9px] font-mono text-white/90 font-bold z-10">
+                        <span className="bg-slate-900/90 px-1.5 py-0.5 rounded border border-slate-700">Roboflow Dataset</span>
+                        <Icon className={`h-3.5 w-3.5 ${item.iconColor}`} />
+                      </div>
 
-                    {/* Bounding Box Visual Overlay */}
-                    <div className="absolute inset-2 border border-dashed border-sky-400/50 bg-sky-500/5 rounded p-1 flex flex-col justify-between">
-                      <span className="text-[8px] font-mono text-sky-300 font-bold bg-slate-950/80 px-1 rounded w-max">
-                        {item.title}
-                      </span>
-                      <span className="text-[7px] font-mono text-slate-400">{item.bboxText}</span>
+                      {/* Bounding Box Visual Overlay */}
+                      <div className="border-2 border-sky-400/80 bg-sky-500/10 rounded p-1 flex flex-col justify-between shadow-lg">
+                        <span className="text-[8px] font-mono text-sky-200 font-bold bg-slate-950/90 px-1 py-0.5 rounded w-max border border-sky-500/40">
+                          {item.title}
+                        </span>
+                        <span className="text-[7px] font-mono text-sky-300 font-bold">{item.bboxText}</span>
+                      </div>
                     </div>
                   </div>
 
