@@ -363,6 +363,116 @@ export const VisionHub: React.FC<VisionHubProps> = ({
 
       </div>
 
+      {/* ====================================================
+          VISUAL HAZARD GALLERY SECTION
+          ==================================================== */}
+      <div className="space-y-4 pt-6 border-t border-slate-800">
+        <div>
+          <div className="flex items-center justify-between">
+            <h3 className="text-base font-bold text-white flex items-center gap-2">
+              <Layers className="h-5 w-5 text-sky-400" /> Roboflow Visual Hazard Model Gallery
+            </h3>
+            <span className="text-xs text-slate-500 font-mono">Dataset: industrialhazards (5 Target Classes)</span>
+          </div>
+          <p className="text-xs text-slate-400 mt-1">
+            Reference library of standard industrial safety hazard signatures detected by the optical neural network.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+          {[
+            {
+              title: "Fire / Open Flame",
+              risk: "CRITICAL",
+              badgeColor: "bg-red-500/20 text-red-400 border-red-500/40",
+              borderColor: "border-red-500/30 hover:border-red-500/60 bg-red-500/5",
+              desc: "Open thermal ignition or volatile gas flame detected near high-pressure fuel lines.",
+              bboxText: "BBOX [120, 90, 160, 210]",
+              icon: AlertTriangle,
+              iconColor: "text-red-400"
+            },
+            {
+              title: "Smoke Plume",
+              risk: "HIGH",
+              badgeColor: "bg-amber-500/20 text-amber-400 border-amber-500/40",
+              borderColor: "border-amber-500/30 hover:border-amber-500/60 bg-amber-500/5",
+              desc: "Dense smoldering exhaust or toxic plume rising from degraded extraction ducts.",
+              bboxText: "BBOX [180, 120, 240, 160]",
+              icon: AlertTriangle,
+              iconColor: "text-amber-400"
+            },
+            {
+              title: "Chemical Hazard",
+              risk: "CRITICAL",
+              badgeColor: "bg-red-500/20 text-red-400 border-red-500/40",
+              borderColor: "border-red-500/30 hover:border-red-500/60 bg-red-500/5",
+              desc: "Uncontained corrosive fluid pool or solvent container leak in storage sector.",
+              bboxText: "BBOX [100, 200, 150, 100]",
+              icon: ShieldAlert,
+              iconColor: "text-red-400"
+            },
+            {
+              title: "No Helmet (PPE)",
+              risk: "HIGH",
+              badgeColor: "bg-amber-500/20 text-amber-400 border-amber-500/40",
+              borderColor: "border-amber-500/30 hover:border-amber-500/60 bg-amber-500/5",
+              desc: "Personnel operating inside active Hot Work area without mandatory protective headgear.",
+              bboxText: "BBOX [310, 220, 60, 60]",
+              icon: Eye,
+              iconColor: "text-amber-400"
+            },
+            {
+              title: "Water Leak",
+              risk: "MEDIUM",
+              badgeColor: "bg-yellow-500/20 text-yellow-400 border-yellow-500/40",
+              borderColor: "border-yellow-500/30 hover:border-yellow-500/60 bg-yellow-500/5",
+              desc: "High-pressure coolant line seepage or pipe joint weeping near electrical switchgear.",
+              bboxText: "BBOX [220, 140, 110, 90]",
+              icon: RefreshCw,
+              iconColor: "text-yellow-400"
+            }
+          ].map((item, idx) => {
+            const Icon = item.icon;
+            return (
+              <div key={idx} className={`p-4 rounded-xl border transition flex flex-col justify-between space-y-3 ${item.borderColor}`}>
+                <div>
+                  <div className="flex items-center justify-between">
+                    <span className={`px-2 py-0.5 rounded text-[9px] font-bold font-mono border ${item.badgeColor}`}>
+                      {item.risk}
+                    </span>
+                    <span className="text-[9px] font-mono text-slate-500">Class {idx + 1}</span>
+                  </div>
+
+                  {/* THUMBNAIL VISUAL ANNOTATION BOX */}
+                  <div className="mt-3 aspect-video rounded-lg bg-slate-950 border border-slate-800 relative p-3 flex flex-col justify-between overflow-hidden shadow-inner">
+                    <div className="flex items-center justify-between text-[9px] font-mono text-slate-500 z-10">
+                      <span>Roboflow YOLOV8</span>
+                      <Icon className={`h-3.5 w-3.5 ${item.iconColor}`} />
+                    </div>
+
+                    {/* Bounding Box Visual Overlay */}
+                    <div className="absolute inset-2 border border-dashed border-sky-400/50 bg-sky-500/5 rounded p-1 flex flex-col justify-between">
+                      <span className="text-[8px] font-mono text-sky-300 font-bold bg-slate-950/80 px-1 rounded w-max">
+                        {item.title}
+                      </span>
+                      <span className="text-[7px] font-mono text-slate-400">{item.bboxText}</span>
+                    </div>
+                  </div>
+
+                  <h4 className="text-xs font-bold text-white mt-3">{item.title}</h4>
+                  <p className="text-[11px] text-slate-400 mt-1 leading-relaxed">{item.desc}</p>
+                </div>
+
+                <div className="pt-2 border-t border-slate-800/80 flex items-center justify-between text-[10px] font-mono text-slate-500">
+                  <span>Confidence Threshold</span>
+                  <span className="text-sky-400 font-bold">&gt;= 85%</span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
     </div>
   );
 };
