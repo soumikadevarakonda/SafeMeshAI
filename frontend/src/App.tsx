@@ -268,10 +268,55 @@ export default function App() {
     setTimeline(prev => [{ type, message, timestamp: new Date().toLocaleTimeString() }, ...prev]);
   };
 
+  // Simulation playback timer
+  useEffect(() => {
+    let interval: any = null;
+    if (simStatus === 'RUNNING') {
+      interval = setInterval(() => {
+        setSimStep(prevStep => {
+          const nextStep = prevStep + 5;
+          if (nextStep >= 80) {
+            setSimStatus('COMPLETED');
+            return 80;
+          }
+          return nextStep;
+        });
+      }, 2000);
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [simStatus]);
+
+  // Sync currentPhaseId based on simStep
+  useEffect(() => {
+    let nextPhase = 1;
+    if (simStep >= 75) {
+      nextPhase = 5;
+    } else if (simStep >= 50) {
+      nextPhase = 4;
+    } else if (simStep >= 25) {
+      nextPhase = 3;
+    } else if (simStep >= 10) {
+      nextPhase = 2;
+    } else {
+      nextPhase = 1;
+    }
+
+    if (nextPhase !== currentPhaseId) {
+      setCurrentPhaseId(nextPhase);
+    }
+  }, [simStep]);
+
+  // Shared simulation state sync across all pages & components
   useEffect(() => {
     if (token) {
+      fetchSummary();
       fetchZones();
       fetchActiveRisks();
+      fetchPermits();
+      fetchWorkers();
+      fetchEquipment();
     }
   }, [currentPhaseId]);
 
@@ -293,17 +338,25 @@ export default function App() {
   };
 
   const fetchSummary = async () => {
+    let score = 92.5;
+    if (currentPhaseId === 3) score = 68.4;
+    else if (currentPhaseId === 4) score = 42.1;
+    else if (currentPhaseId === 5) score = 95.0;
+
     try {
       const res = await axios.get('/api/dashboard/summary');
       setSummary({
         ...res.data,
+        plantSafetyScore: score,
         activeCriticalRisks: currentPhaseId >= 3 && currentPhaseId <= 4 ? 1 : 0,
+        highRiskZones: currentPhaseId >= 3 && currentPhaseId <= 4 ? 1 : 0,
+        workersExposed: currentPhaseId === 4 ? 15 : (currentPhaseId === 5 ? 0 : 2),
         equipmentAlerts: 6,
         activePermits: 27
       });
     } catch (err) {
       setSummary({
-        plantSafetyScore: currentPhaseId >= 3 && currentPhaseId <= 4 ? 68.4 : 92.5,
+        plantSafetyScore: score,
         activeCriticalRisks: currentPhaseId >= 3 && currentPhaseId <= 4 ? 1 : 0,
         highRiskZones: currentPhaseId >= 3 && currentPhaseId <= 4 ? 1 : 0,
         workersExposed: currentPhaseId === 4 ? 15 : (currentPhaseId === 5 ? 0 : 2),
@@ -545,11 +598,14 @@ export default function App() {
   const resetSimulation = async () => {
     try {
       await axios.post(`/api/simulations/sim-session/reset`);
-      setSimStatus('IDLE');
-      setSimStep(0);
-      fetchInitialData();
-      addTimelineEvent('SIMULATION_RESET', 'Simulation values reset to default states.');
     } catch (err) {}
+    setSimStatus('IDLE');
+    setSimStep(0);
+    setCurrentPhaseId(1);
+    setActiveIntervention(null);
+    setInterventionProgress(0);
+    fetchInitialData();
+    addTimelineEvent('SIMULATION_RESET', 'Simulation values reset to default states.');
   };
 
   // Execute safety intervention
