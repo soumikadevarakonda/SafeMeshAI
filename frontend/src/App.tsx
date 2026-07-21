@@ -369,75 +369,55 @@ export default function App() {
   };
 
   const fetchZones = async () => {
-    let zonesData = [];
     try {
       const res = await axios.get('/api/plants');
       if (res.data.length > 0) {
         const plantId = res.data[0].id;
         const zonesRes = await axios.get(`/api/plants/${plantId}/zones`);
-        zonesData = zonesRes.data || [];
+        
+        // Enrich exact SVG layout zones with realistic LEL index scores & Medium Yellow severity states
+        const enrichedZones = zonesRes.data.map((z: any) => {
+          let score = z.riskScore || 0;
+          let severity = z.riskSeverity || 'LOW';
+
+          if (z.code === 'ZONE-COB' || z.name?.includes('Coke Oven')) {
+            severity = 'CRITICAL';
+            score = 88.0;
+          } else if (z.code === 'ZONE-BH' || z.name?.includes('Boiler')) {
+            severity = 'MEDIUM';
+            score = 28.0;
+          } else if (z.code === 'ZONE-GS' || z.name?.includes('Gas Storage')) {
+            severity = 'MEDIUM';
+            score = 24.0;
+          } else if (z.code === 'ZONE-CS' || z.name?.includes('Compressor')) {
+            severity = 'MEDIUM';
+            score = 32.0;
+          } else if (z.code === 'ZONE-BF' || z.name?.includes('Blast Furnace')) {
+            severity = 'MEDIUM';
+            score = 18.5;
+          } else if (z.code === 'ZONE-RMH' || z.name?.includes('Raw Material')) {
+            severity = 'LOW';
+            score = 4.2;
+          } else if (z.code === 'ZONE-MW' || z.name?.includes('Maintenance')) {
+            severity = 'LOW';
+            score = 2.1;
+          } else if (z.code === 'ZONE-WL' || z.name?.includes('Warehouse')) {
+            severity = 'LOW';
+            score = 1.5;
+          } else if (z.code === 'ZONE-UA' || z.name?.includes('Utilities')) {
+            severity = 'LOW';
+            score = 1.2;
+          } else if (z.code === 'ZONE-CR' || z.name?.includes('Control Room')) {
+            severity = 'LOW';
+            score = 0.8;
+          }
+
+          return { ...z, riskScore: score, riskSeverity: severity };
+        });
+
+        setZones(enrichedZones);
       }
     } catch (err) {}
-
-    // Fallback default zones if backend endpoint returns empty
-    if (zonesData.length === 0) {
-      zonesData = [
-        { id: 'z-cob', code: 'ZONE-COB', name: 'Coke Oven Battery #4', coordinates: '50,50 350,50 350,220 50,220' },
-        { id: 'z-bf', code: 'ZONE-BF', name: 'Blast Furnace Yard', coordinates: '380,50 780,50 780,220 380,220' },
-        { id: 'z-bh', code: 'ZONE-BH', name: 'Boiler House', coordinates: '50,250 240,250 240,380 50,380' },
-        { id: 'z-cs', code: 'ZONE-CS', name: 'Compressor Station', coordinates: '260,250 450,250 450,380 260,380' },
-        { id: 'z-gs', code: 'ZONE-GS', name: 'Gas Storage Yard', coordinates: '470,250 780,250 780,380 470,380' },
-        { id: 'z-rmh', code: 'ZONE-RMH', name: 'Raw Material Handling', coordinates: '50,400 240,400 240,500 50,500' },
-        { id: 'z-mw', code: 'ZONE-MW', name: 'Maintenance Workshop', coordinates: '260,400 450,400 450,500 260,500' },
-        { id: 'z-wl', code: 'ZONE-WL', name: 'Warehouse Logistics', coordinates: '470,400 620,400 620,500 470,500' },
-        { id: 'z-ua', code: 'ZONE-UA', name: 'Utilities Area', coordinates: '640,400 780,400 780,500 640,500' },
-        { id: 'z-cr', code: 'ZONE-CR', name: 'Control Room Hub', coordinates: '350,10 500,10 500,40 350,40' }
-      ];
-    }
-
-    // Enrich exact SVG layout zones with realistic LEL index scores & Medium Yellow severity states
-    const enrichedZones = zonesData.map((z: any) => {
-      let score = z.riskScore || 0;
-      let severity = z.riskSeverity || 'LOW';
-
-      if (z.code === 'ZONE-COB' || z.name?.includes('Coke Oven')) {
-        if (currentPhaseId === 4) { severity = 'CRITICAL'; score = 88.0; }
-        else if (currentPhaseId === 3) { severity = 'HIGH'; score = 48.0; }
-        else if (currentPhaseId === 5) { severity = 'LOW'; score = 1.8; }
-        else { severity = 'MEDIUM'; score = 19.5; }
-      } else if (z.code === 'ZONE-BH' || z.name?.includes('Boiler')) {
-        severity = 'MEDIUM';
-        score = 28.0;
-      } else if (z.code === 'ZONE-GS' || z.name?.includes('Gas Storage')) {
-        severity = 'MEDIUM';
-        score = 24.0;
-      } else if (z.code === 'ZONE-CS' || z.name?.includes('Compressor')) {
-        severity = 'MEDIUM';
-        score = 32.0;
-      } else if (z.code === 'ZONE-BF' || z.name?.includes('Blast Furnace')) {
-        severity = 'MEDIUM';
-        score = 18.5;
-      } else if (z.code === 'ZONE-RMH' || z.name?.includes('Raw Material')) {
-        severity = 'LOW';
-        score = 4.2;
-      } else if (z.code === 'ZONE-MW' || z.name?.includes('Maintenance')) {
-        severity = 'LOW';
-        score = 2.1;
-      } else if (z.code === 'ZONE-WL' || z.name?.includes('Warehouse')) {
-        severity = 'LOW';
-        score = 1.5;
-      } else if (z.code === 'ZONE-UA' || z.name?.includes('Utilities')) {
-        severity = 'LOW';
-        score = 1.2;
-      } else if (z.code === 'ZONE-CR' || z.name?.includes('Control Room')) {
-        severity = 'LOW';
-        score = 0.8;
-      }
-
-      return { ...z, riskScore: score, riskSeverity: severity };
-    });
-
-    setZones(enrichedZones);
   };
 
   const fetchActiveRisks = async () => {
@@ -1259,27 +1239,16 @@ export default function App() {
                       const w = parseInt(points[2].split(',')[0]) - x;
                       const h = parseInt(points[2].split(',')[1]) - y;
 
-                      // Dynamically compute severity & score matching shared simulation state
-                      let effectiveSeverity = zone.riskSeverity;
-                      let effectiveScore = zone.riskScore;
-
-                      if (zone.code === 'ZONE-COB' || zone.name?.includes('Coke Oven')) {
-                        if (currentPhaseId === 4) { effectiveSeverity = 'CRITICAL'; effectiveScore = 88.0; }
-                        else if (currentPhaseId === 3) { effectiveSeverity = 'HIGH'; effectiveScore = 48.0; }
-                        else if (currentPhaseId === 5) { effectiveSeverity = 'LOW'; effectiveScore = 1.8; }
-                        else { effectiveSeverity = 'MEDIUM'; effectiveScore = 19.5; }
-                      }
-
                       // Fill color based on risk severity
                       let fill = 'rgba(16, 185, 129, 0.1)'; // green-500
                       let stroke = '#10b981';
-                      if (effectiveSeverity === 'CRITICAL') {
+                      if (zone.riskSeverity === 'CRITICAL') {
                         fill = 'rgba(239, 68, 68, 0.25)';
                         stroke = '#ef4444';
-                      } else if (effectiveSeverity === 'HIGH') {
+                      } else if (zone.riskSeverity === 'HIGH') {
                         fill = 'rgba(249, 115, 22, 0.2)';
                         stroke = '#f97316';
-                      } else if (effectiveSeverity === 'MEDIUM') {
+                      } else if (zone.riskSeverity === 'MEDIUM') {
                         fill = 'rgba(245, 158, 11, 0.15)';
                         stroke = '#f59e0b';
                       }
@@ -1287,7 +1256,7 @@ export default function App() {
                       return (
                         <g 
                           key={zone.id} 
-                          onClick={() => selectZoneForLiveDetails({ ...zone, riskSeverity: effectiveSeverity, riskScore: effectiveScore })}
+                          onClick={() => selectZoneForLiveDetails(zone)}
                           className="cursor-pointer group"
                         >
                           <rect 
@@ -1320,11 +1289,11 @@ export default function App() {
                           {/* Live Risk Index Badge */}
                           <rect
                             x={x + 12} y={y + h - 28} width="95" height="18"
-                            fill={effectiveSeverity === 'CRITICAL' ? '#ef4444' : (effectiveSeverity === 'HIGH' ? '#f97316' : '#1e293b')}
+                            fill={zone.riskSeverity === 'CRITICAL' ? '#ef4444' : '#1e293b'}
                             rx="3"
                           />
                           <text x={x + 18} y={y + h - 15} className="fill-white text-[10px] font-mono font-extrabold">
-                            LEL INDEX: {effectiveScore?.toFixed(0)}%
+                            LEL INDEX: {zone.riskScore?.toFixed(0)}%
                           </text>
                         </g>
                       );

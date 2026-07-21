@@ -267,19 +267,8 @@ export interface RealisticZone {
 }
 
 export const GENERATE_REALISTIC_ZONES = (currentPhaseId: number): RealisticZone[] => {
-  let cobSeverity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' = 'MEDIUM';
-  let cobScore = 19.5;
-
-  if (currentPhaseId === 3) {
-    cobSeverity = 'HIGH';
-    cobScore = 48.0;
-  } else if (currentPhaseId === 4) {
-    cobSeverity = 'CRITICAL';
-    cobScore = 88.0;
-  } else if (currentPhaseId === 5) {
-    cobSeverity = 'LOW';
-    cobScore = 1.8;
-  }
+  let cobSeverity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' = 'CRITICAL';
+  let cobScore = 88.0;
 
   return [
     {
